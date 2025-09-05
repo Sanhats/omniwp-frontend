@@ -6,7 +6,7 @@ import { toast } from 'sonner';
 import { getErrorMessage } from '@/lib/types/errors';
 
 export const useAuth = () => {
-  const { login, logout, isAuthenticated } = useAuthStore();
+  const { login, logout, isAuthenticated, isInitialized, initializeAuth } = useAuthStore();
   const router = useRouter();
 
   // Mutación para login
@@ -57,6 +57,8 @@ export const useAuth = () => {
     register: registerMutation.mutate,
     logout: handleLogout,
     isAuthenticated,
+    isInitialized,
+    initializeAuth,
     isLoading: loginMutation.isPending || registerMutation.isPending,
     isBackendHealthy: healthQuery.isSuccess,
   };
