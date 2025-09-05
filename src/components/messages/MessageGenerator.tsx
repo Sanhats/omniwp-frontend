@@ -14,6 +14,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Textarea } from '@/components/ui/textarea';
 import { Loader2, MessageSquare, Copy, Check } from 'lucide-react';
+import { toast } from 'sonner';
 
 const templateTypes = [
   { value: 'confirmacion', label: 'Confirmación de Pedido' },
