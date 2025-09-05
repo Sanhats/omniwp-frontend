@@ -8,12 +8,20 @@ export const useMessages = () => {
   const generateMutation = useMutation({
     mutationFn: messagesApi.generateTemplate,
     onSuccess: (data) => {
-      // Copiar al portapapeles
-      if (navigator.clipboard) {
-        navigator.clipboard.writeText(data.text);
-        toast.success('Mensaje generado y copiado al portapapeles');
+      console.log('Respuesta del backend:', data);
+      console.log('Mensaje generado:', data.message);
+      
+      if (data.message) {
+        // Copiar al portapapeles
+        if (navigator.clipboard) {
+          navigator.clipboard.writeText(data.message);
+          toast.success('Mensaje generado y copiado al portapapeles');
+        } else {
+          toast.success('Mensaje generado');
+        }
       } else {
-        toast.success('Mensaje generado');
+        console.error('No se pudo extraer el mensaje de la respuesta:', data);
+        toast.error('Error: No se pudo generar el mensaje');
       }
     },
     onError: (error: unknown) => {
@@ -24,7 +32,7 @@ export const useMessages = () => {
 
   return {
     generateMessage: generateMutation.mutate,
-    generatedText: generateMutation.data?.text,
+    generatedText: generateMutation.data?.message,
     isGenerating: generateMutation.isPending,
     error: generateMutation.error,
   };

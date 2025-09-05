@@ -7,6 +7,9 @@ export const messagesApi = {
     console.log('Generando mensaje:', data);
     
     const response = await apiClient.post('/messages/template', data);
+    console.log('Respuesta completa del backend:', response);
+    console.log('Datos de la respuesta:', response.data);
+    
     return response.data;
   },
 };

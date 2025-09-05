@@ -36,7 +36,17 @@ export interface MessageTemplate {
 }
 
 export interface MessageResponse {
-  text: string;
+  message: string;
+  client: {
+    id: string;
+    name: string;
+    phone: string;
+  };
+  order: {
+    id: string;
+    description: string;
+    status: string;
+  };
 }
 
 export interface ApiError {
