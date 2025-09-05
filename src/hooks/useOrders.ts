@@ -54,7 +54,7 @@ export const useOrders = () => {
   });
 
   return {
-    orders: ordersQuery.data || [],
+    orders: Array.isArray(ordersQuery.data) ? ordersQuery.data : [],
     isLoading: ordersQuery.isLoading,
     error: ordersQuery.error,
     createOrder: createMutation.mutate,

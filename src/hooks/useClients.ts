@@ -54,7 +54,7 @@ export const useClients = () => {
   });
 
   return {
-    clients: clientsQuery.data || [],
+    clients: Array.isArray(clientsQuery.data) ? clientsQuery.data : [],
     isLoading: clientsQuery.isLoading,
     error: clientsQuery.error,
     createClient: createMutation.mutate,

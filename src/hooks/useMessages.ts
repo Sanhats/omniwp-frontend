@@ -69,6 +69,7 @@ export const useMessageHistory = (filters?: MessageFilters) => {
     queryKey: ['messages', filters],
     queryFn: () => messagesApi.getMessages(filters),
     staleTime: 30000, // 30 segundos
+    select: (data) => Array.isArray(data) ? data : [],
   });
 };
 
