@@ -225,23 +225,50 @@ export function MessageGenerator() {
                 readOnly
                 className="min-h-[100px] resize-none"
               />
-              <Button
-                onClick={handleCopy}
-                variant="outline"
-                className="w-full"
-              >
-                {copied ? (
-                  <>
-                    <Check className="mr-2 h-4 w-4" />
-                    ¡Copiado!
-                  </>
-                ) : (
-                  <>
-                    <Copy className="mr-2 h-4 w-4" />
-                    Copiar al Portapapeles
-                  </>
-                )}
-              </Button>
+              <div className="flex space-x-2">
+                <Button
+                  onClick={handleCopy}
+                  variant="outline"
+                  className="flex-1"
+                >
+                  {copied ? (
+                    <>
+                      <Check className="mr-2 h-4 w-4" />
+                      ¡Copiado!
+                    </>
+                  ) : (
+                    <>
+                      <Copy className="mr-2 h-4 w-4" />
+                      Copiar
+                    </>
+                  )}
+                </Button>
+                <Button
+                  onClick={() => {
+                    if (generatedText) {
+                      const clientName = watch('variables.clientName');
+                      const client = clients.find(c => c.name === clientName);
+                      
+                      if (client && client.phone) {
+                        // Limpiar el teléfono (remover + si existe)
+                        const cleanPhone = client.phone.replace('+', '');
+                        const whatsappUrl = `https://wa.me/${cleanPhone}?text=${encodeURIComponent(generatedText)}`;
+                        window.open(whatsappUrl, '_blank');
+                        toast.success(`Abriendo WhatsApp para ${client.name}`);
+                      } else {
+                        toast.error('Selecciona un cliente con teléfono válido para enviar el mensaje');
+                      }
+                    } else {
+                      toast.error('Primero genera un mensaje');
+                    }
+                  }}
+                  className="flex-1"
+                  disabled={!generatedText}
+                >
+                  <MessageSquare className="mr-2 h-4 w-4" />
+                  Enviar por WhatsApp
+                </Button>
+              </div>
             </div>
           </CardContent>
         </Card>

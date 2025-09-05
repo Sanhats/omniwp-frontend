@@ -15,7 +15,13 @@ export const registerSchema = z.object({
 // Validaciones para clientes
 export const clientSchema = z.object({
   name: z.string().min(2, 'El nombre debe tener al menos 2 caracteres'),
-  phone: z.string().min(8, 'El teléfono debe tener al menos 8 caracteres'),
+  phone: z.string()
+    .min(10, 'El teléfono debe tener al menos 10 caracteres')
+    .regex(/^\d+$/, 'El teléfono debe contener solo dígitos')
+    .refine((phone) => {
+      // Validar que tenga código de país (empezar con 54 para Argentina)
+      return phone.startsWith('54') || phone.startsWith('+54');
+    }, 'El teléfono debe incluir código de país (ej: 549112345678)'),
   email: z.string().email('Email inválido').optional().or(z.literal('')),
 });
 

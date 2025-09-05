@@ -90,7 +90,7 @@ export function ClientForm({
               <Input
                 id="phone"
                 type="tel"
-                placeholder="+54 9 11 1234-5678"
+                placeholder="549112345678"
                 className="pl-10"
                 {...register('phone')}
               />
