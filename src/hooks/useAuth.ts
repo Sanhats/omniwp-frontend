@@ -43,12 +43,13 @@ export const useAuth = () => {
     router.push('/auth/login');
   };
 
-  // Verificar salud del backend
+  // Verificar salud del backend (deshabilitado temporalmente por CORS)
   const healthQuery = useQuery({
     queryKey: ['health'],
     queryFn: authApi.health,
     retry: 1,
     refetchOnWindowFocus: false,
+    enabled: false, // Deshabilitado temporalmente
   });
 
   return {
