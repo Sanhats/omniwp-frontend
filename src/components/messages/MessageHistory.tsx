@@ -51,7 +51,7 @@ export default function MessageHistory({ clientId, orderId }: MessageHistoryProp
     setSearchTerm('');
   };
 
-  const filteredMessages = messages.filter(message =>
+  const filteredMessages = (messages || []).filter(message =>
     message.text.toLowerCase().includes(searchTerm.toLowerCase())
   );
 

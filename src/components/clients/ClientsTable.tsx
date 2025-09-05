@@ -68,6 +68,7 @@ export function ClientsTable({
   };
 
   const getMessageCount = (clientId: string) => {
+    if (!messages || !Array.isArray(messages)) return 0;
     return messages.filter(message => message.clientId === clientId).length;
   };
 

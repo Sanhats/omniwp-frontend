@@ -74,6 +74,7 @@ export function OrdersTable({
   };
 
   const getMessageCount = (orderId: string) => {
+    if (!messages || !Array.isArray(messages)) return 0;
     return messages.filter(message => message.orderId === orderId).length;
   };
 
