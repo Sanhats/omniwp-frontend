@@ -1,4 +1,4 @@
-import { useMutation, useQuery } from '@tanstack/react-query';
+import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { authApi } from '@/lib/api/auth';
 import { useAuthStore } from '@/store/auth';
 import { useRouter } from 'next/navigation';
@@ -8,11 +8,15 @@ import { getErrorMessage } from '@/lib/types/errors';
 export const useAuth = () => {
   const { login, logout, isAuthenticated, isInitialized, initializeAuth } = useAuthStore();
   const router = useRouter();
+  const queryClient = useQueryClient();
 
   // Mutación para login
   const loginMutation = useMutation({
     mutationFn: authApi.login,
     onSuccess: (data) => {
+      // Limpiar caché antes de hacer login
+      queryClient.clear();
+      
       login(data.user, data.token);
       toast.success('¡Bienvenido!');
       router.push('/dashboard');
@@ -38,7 +42,12 @@ export const useAuth = () => {
 
   // Función para logout
   const handleLogout = () => {
+    // Limpiar todo el caché de React Query
+    queryClient.clear();
+    
+    // Hacer logout del store
     logout();
+    
     toast.success('Sesión cerrada');
     router.push('/auth/login');
   };
