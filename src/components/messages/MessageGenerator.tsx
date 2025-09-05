@@ -8,7 +8,6 @@ import { useMessages } from '@/hooks/useMessages';
 import { useClients } from '@/hooks/useClients';
 import { useOrders } from '@/hooks/useOrders';
 import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
@@ -29,7 +28,6 @@ export function MessageGenerator() {
   const [copied, setCopied] = useState(false);
 
   const {
-    register,
     handleSubmit,
     watch,
     setValue,
@@ -38,11 +36,19 @@ export function MessageGenerator() {
     resolver: zodResolver(messageTemplateSchema),
     defaultValues: {
       templateType: 'confirmacion',
-      variables: {},
+      clientId: '',
+      orderId: '',
     },
   });
 
   const selectedTemplateType = watch('templateType');
+  const selectedClientId = watch('clientId');
+  const selectedOrderId = watch('orderId');
+
+  // Filtrar pedidos del cliente seleccionado
+  const clientOrders = selectedClientId 
+    ? orders.filter(order => order.clientId === selectedClientId)
+    : [];
 
   const handleFormSubmit = (data: MessageTemplateFormData) => {
     generateMessage(data);
@@ -56,32 +62,14 @@ export function MessageGenerator() {
     }
   };
 
-  const getClientName = (clientId: string) => {
-    const client = clients.find(c => c.id === clientId);
-    return client ? client.name : '';
-  };
-
-  const getOrderInfo = (orderId: string) => {
-    const order = orders.find(o => o.id === orderId);
-    if (!order) return { date: '', status: '' };
-    
-    const client = clients.find(c => c.id === order.clientId);
-    return {
-      date: new Date().toLocaleDateString('es-ES'),
-      status: order.status,
-      clientName: client?.name || '',
-    };
-  };
-
   const handleClientChange = (clientId: string) => {
-    setValue('variables.clientName', getClientName(clientId));
+    setValue('clientId', clientId);
+    // Limpiar pedido seleccionado cuando cambia el cliente
+    setValue('orderId', '');
   };
 
   const handleOrderChange = (orderId: string) => {
-    const orderInfo = getOrderInfo(orderId);
-    setValue('variables.orderDate', orderInfo.date);
-    setValue('variables.orderStatus', orderInfo.status);
-    setValue('variables.clientName', orderInfo.clientName);
+    setValue('orderId', orderId);
   };
 
   return (
@@ -123,8 +111,11 @@ export function MessageGenerator() {
 
             {/* Client Selection */}
             <div className="space-y-2">
-              <Label htmlFor="clientId">Cliente</Label>
-              <Select onValueChange={handleClientChange}>
+              <Label htmlFor="clientId">Cliente *</Label>
+              <Select 
+                value={selectedClientId} 
+                onValueChange={handleClientChange}
+              >
                 <SelectTrigger>
                   <SelectValue placeholder="Selecciona un cliente" />
                 </SelectTrigger>
@@ -136,63 +127,32 @@ export function MessageGenerator() {
                   ))}
                 </SelectContent>
               </Select>
+              {errors.clientId && (
+                <p className="text-sm text-red-500">{errors.clientId.message}</p>
+              )}
             </div>
 
-            {/* Order Selection (for recordatorio and seguimiento) */}
-            {(selectedTemplateType === 'recordatorio' || selectedTemplateType === 'seguimiento') && (
-              <div className="space-y-2">
-                <Label htmlFor="orderId">Pedido</Label>
-                <Select onValueChange={handleOrderChange}>
-                  <SelectTrigger>
-                    <SelectValue placeholder="Selecciona un pedido" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    {orders.map((order) => {
-                      const client = clients.find(c => c.id === order.clientId);
-                      return (
-                        <SelectItem key={order.id} value={order.id}>
-                          {order.description} - {client?.name}
-                        </SelectItem>
-                      );
-                    })}
-                  </SelectContent>
-                </Select>
-              </div>
-            )}
-
-            {/* Manual Variables */}
-            <div className="space-y-4">
-              <Label>Variables del Mensaje</Label>
-              
-              <div className="space-y-2">
-                <Label htmlFor="clientName">Nombre del Cliente</Label>
-                <Input
-                  id="clientName"
-                  placeholder="Nombre del cliente"
-                  {...register('variables.clientName')}
-                />
-              </div>
-
-              {(selectedTemplateType === 'recordatorio' || selectedTemplateType === 'seguimiento') && (
-                <>
-                  <div className="space-y-2">
-                    <Label htmlFor="orderDate">Fecha del Pedido</Label>
-                    <Input
-                      id="orderDate"
-                      placeholder="Fecha del pedido"
-                      {...register('variables.orderDate')}
-                    />
-                  </div>
-
-                  <div className="space-y-2">
-                    <Label htmlFor="orderStatus">Estado del Pedido</Label>
-                    <Input
-                      id="orderStatus"
-                      placeholder="Estado del pedido"
-                      {...register('variables.orderStatus')}
-                    />
-                  </div>
-                </>
+            {/* Order Selection */}
+            <div className="space-y-2">
+              <Label htmlFor="orderId">Pedido *</Label>
+              <Select 
+                value={selectedOrderId} 
+                onValueChange={handleOrderChange}
+                disabled={!selectedClientId}
+              >
+                <SelectTrigger>
+                  <SelectValue placeholder={selectedClientId ? "Selecciona un pedido" : "Primero selecciona un cliente"} />
+                </SelectTrigger>
+                <SelectContent>
+                  {clientOrders.map((order) => (
+                    <SelectItem key={order.id} value={order.id}>
+                      {order.description} - {order.status}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+              {errors.orderId && (
+                <p className="text-sm text-red-500">{errors.orderId.message}</p>
               )}
             </div>
 
@@ -247,8 +207,7 @@ export function MessageGenerator() {
                 <Button
                   onClick={() => {
                     if (generatedText) {
-                      const clientName = watch('variables.clientName');
-                      const client = clients.find(c => c.name === clientName);
+                      const client = clients.find(c => c.id === selectedClientId);
                       
                       if (client && client.phone) {
                         // Limpiar el teléfono (remover + si existe)

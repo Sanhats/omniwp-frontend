@@ -41,11 +41,8 @@ export const orderUpdateSchema = z.object({
 // Validaciones para mensajes
 export const messageTemplateSchema = z.object({
   templateType: z.enum(['confirmacion', 'recordatorio', 'seguimiento']),
-  variables: z.object({
-    clientName: z.string().optional(),
-    orderDate: z.string().optional(),
-    orderStatus: z.string().optional(),
-  }),
+  clientId: z.string().min(1, 'Debe seleccionar un cliente'),
+  orderId: z.string().min(1, 'Debe seleccionar un pedido'),
 });
 
 // Tipos inferidos de las validaciones

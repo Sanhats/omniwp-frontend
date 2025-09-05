@@ -31,11 +31,8 @@ export interface OrderWithClient extends Order {
 
 export interface MessageTemplate {
   templateType: 'confirmacion' | 'recordatorio' | 'seguimiento';
-  variables: {
-    clientName?: string;
-    orderDate?: string;
-    orderStatus?: string;
-  };
+  clientId: string;
+  orderId: string;
 }
 
 export interface MessageResponse {
