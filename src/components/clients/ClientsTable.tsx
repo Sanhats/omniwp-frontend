@@ -8,6 +8,8 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { Edit, Trash2, Phone, Mail, User } from 'lucide-react';
 import { ClientForm } from './ClientForm';
 import { ClientUpdateFormData } from '@/lib/validations';
+import { useOrders } from '@/hooks/useOrders';
+import { toast } from 'sonner';
 
 interface ClientsTableProps {
   clients: Client[];
@@ -26,6 +28,7 @@ export function ClientsTable({
 }: ClientsTableProps) {
   const [editingClient, setEditingClient] = useState<Client | null>(null);
   const [isFormOpen, setIsFormOpen] = useState(false);
+  const { orders } = useOrders();
 
   const handleEdit = (client: Client) => {
     setEditingClient(client);
@@ -41,6 +44,14 @@ export function ClientsTable({
   };
 
   const handleDelete = (id: string) => {
+    // Verificar si el cliente tiene pedidos asociados
+    const clientOrders = orders.filter(order => order.clientId === id);
+    
+    if (clientOrders.length > 0) {
+      toast.error(`No se puede eliminar este cliente porque tiene ${clientOrders.length} pedido(s) asociado(s). Elimina primero los pedidos.`);
+      return;
+    }
+    
     if (confirm('¿Estás seguro de que quieres eliminar este cliente?')) {
       onDelete(id);
     }
