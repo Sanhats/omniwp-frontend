@@ -42,7 +42,7 @@ export default function MessageHistory({ clientId, orderId }: MessageHistoryProp
   const handleFilterChange = (key: keyof MessageFilters, value: string) => {
     setFilters(prev => ({
       ...prev,
-      [key]: value || undefined,
+      [key]: value === 'all' ? undefined : value || undefined,
     }));
   };
 
@@ -135,14 +135,14 @@ export default function MessageHistory({ clientId, orderId }: MessageHistoryProp
           </div>
           
           <Select
-            value={filters.status || ''}
+            value={filters.status || 'all'}
             onValueChange={(value) => handleFilterChange('status', value)}
           >
             <SelectTrigger className="w-40">
               <SelectValue placeholder="Estado" />
             </SelectTrigger>
             <SelectContent>
-              <SelectItem value="">Todos los estados</SelectItem>
+              <SelectItem value="all">Todos los estados</SelectItem>
               {Object.entries(statusConfig).map(([key, config]) => (
                 <SelectItem key={key} value={key}>
                   {config.label}
@@ -152,14 +152,14 @@ export default function MessageHistory({ clientId, orderId }: MessageHistoryProp
           </Select>
 
           <Select
-            value={filters.channel || ''}
+            value={filters.channel || 'all'}
             onValueChange={(value) => handleFilterChange('channel', value)}
           >
             <SelectTrigger className="w-40">
               <SelectValue placeholder="Canal" />
             </SelectTrigger>
             <SelectContent>
-              <SelectItem value="">Todos los canales</SelectItem>
+              <SelectItem value="all">Todos los canales</SelectItem>
               {Object.entries(channelConfig).map(([key, config]) => (
                 <SelectItem key={key} value={key}>
                   {config.label}
