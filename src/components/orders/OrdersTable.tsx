@@ -84,7 +84,7 @@ export function OrdersTable({
   };
 
   const getClientName = (clientId: string) => {
-    const client = clients.find(c => c.id === clientId);
+    const client = (clients || []).find(c => c.id === clientId);
     return client ? client.name : 'Cliente no encontrado';
   };
 
@@ -127,7 +127,7 @@ export function OrdersTable({
                 </TableRow>
               </TableHeader>
               <TableBody>
-                {orders.map((order) => (
+                {(orders || []).map((order) => (
                   <TableRow key={order.id}>
                     <TableCell>
                       <div className="flex items-center space-x-3">

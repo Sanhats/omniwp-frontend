@@ -115,7 +115,7 @@ export function ClientsTable({
                 </TableRow>
               </TableHeader>
               <TableBody>
-                {clients.map((client) => (
+                {(clients || []).map((client) => (
                   <TableRow key={client.id}>
                     <TableCell>
                       <div className="flex items-center space-x-3">

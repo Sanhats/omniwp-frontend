@@ -46,7 +46,7 @@ export function MessageGenerator() {
   const selectedOrderId = watch('orderId');
 
   // Filtrar pedidos del cliente seleccionado
-  const clientOrders = selectedClientId 
+  const clientOrders = selectedClientId && orders && Array.isArray(orders)
     ? orders.filter(order => order.clientId === selectedClientId)
     : [];
 
@@ -120,7 +120,7 @@ export function MessageGenerator() {
                   <SelectValue placeholder="Selecciona un cliente" />
                 </SelectTrigger>
                 <SelectContent>
-                  {clients.map((client) => (
+                  {(clients || []).map((client) => (
                     <SelectItem key={client.id} value={client.id}>
                       {client.name}
                     </SelectItem>
@@ -207,7 +207,7 @@ export function MessageGenerator() {
                 <Button
                   onClick={() => {
                     if (generatedText) {
-                      const client = clients.find(c => c.id === selectedClientId);
+                      const client = (clients || []).find(c => c.id === selectedClientId);
                       
                       if (client && client.phone) {
                         // Limpiar el teléfono (remover + si existe)
