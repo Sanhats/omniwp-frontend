@@ -17,7 +17,14 @@ export const ordersApi = {
 
   // Actualizar pedido
   update: async (id: string, data: OrderUpdateFormData): Promise<Order> => {
-    const response = await apiClient.put(`/orders/${id}`, data);
+    // Filtrar campos undefined y vacíos
+    const filteredData = Object.fromEntries(
+      Object.entries(data).filter(([, value]) => value !== undefined && value !== '')
+    );
+    
+    console.log('Actualizando pedido:', { id, data: filteredData });
+    
+    const response = await apiClient.put(`/orders/${id}`, filteredData);
     return response.data;
   },
 
