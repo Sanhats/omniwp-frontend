@@ -49,6 +49,52 @@ export interface MessageResponse {
   };
 }
 
+// Nuevos tipos para mensajes reales
+export interface SendMessageRequest {
+  clientId: string;
+  orderId: string;
+  channel: 'whatsapp' | 'email';
+  templateType: 'confirmacion' | 'recordatorio' | 'seguimiento' | 'entrega' | 'agradecimiento';
+  variables: {
+    clientName: string;
+    orderDescription: string;
+  };
+}
+
+export interface SendMessageResponse {
+  id: string;
+  status: 'queued' | 'sent' | 'delivered' | 'read' | 'failed';
+  providerMessageId: string;
+  channel: 'whatsapp' | 'email';
+}
+
+export interface Message {
+  id: string;
+  clientId: string;
+  orderId: string;
+  channel: 'whatsapp' | 'email';
+  status: 'queued' | 'sent' | 'delivered' | 'read' | 'failed';
+  text: string;
+  createdAt: string;
+  updatedAt?: string;
+  providerMessageId?: string;
+}
+
+export interface MessageFilters {
+  clientId?: string;
+  orderId?: string;
+  status?: string;
+  channel?: string;
+}
+
+export interface MessageTemplates {
+  confirmacion: string;
+  recordatorio: string;
+  seguimiento: string;
+  entrega: string;
+  agradecimiento: string;
+}
+
 export interface ApiError {
   error: string;
 }

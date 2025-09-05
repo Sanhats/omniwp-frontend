@@ -1,8 +1,9 @@
 'use client';
 
 import { MessageGenerator } from '@/components/messages/MessageGenerator';
+import MessageHistory from '@/components/messages/MessageHistory';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-import { MessageSquare, Users, Package } from 'lucide-react';
+import { MessageSquare, Users, Package, History } from 'lucide-react';
 
 export default function MessagesPage() {
   return (
@@ -13,42 +14,55 @@ export default function MessagesPage() {
       </div>
 
       {/* Info Cards */}
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+      <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
         <Card>
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
             <CardTitle className="text-sm font-medium">Plantillas Disponibles</CardTitle>
             <MessageSquare className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">3</div>
+            <div className="text-2xl font-bold">5</div>
             <p className="text-xs text-muted-foreground">
-              Confirmación, Recordatorio, Seguimiento
+              Confirmación, Recordatorio, Seguimiento, Entrega, Agradecimiento
             </p>
           </CardContent>
         </Card>
 
         <Card>
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Variables Dinámicas</CardTitle>
+            <CardTitle className="text-sm font-medium">Envío Real</CardTitle>
             <Users className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">3</div>
+            <div className="text-2xl font-bold">✓</div>
             <p className="text-xs text-muted-foreground">
-              Nombre, Fecha, Estado
+              WhatsApp + Email
             </p>
           </CardContent>
         </Card>
 
         <Card>
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Copia Automática</CardTitle>
+            <CardTitle className="text-sm font-medium">Vista Previa</CardTitle>
             <Package className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
           <CardContent>
             <div className="text-2xl font-bold">✓</div>
             <p className="text-xs text-muted-foreground">
-              Al portapapeles
+              Antes de enviar
+            </p>
+          </CardContent>
+        </Card>
+
+        <Card>
+          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+            <CardTitle className="text-sm font-medium">Historial</CardTitle>
+            <History className="h-4 w-4 text-muted-foreground" />
+          </CardHeader>
+          <CardContent>
+            <div className="text-2xl font-bold">✓</div>
+            <p className="text-xs text-muted-foreground">
+              Con filtros y estados
             </p>
           </CardContent>
         </Card>
@@ -56,6 +70,9 @@ export default function MessagesPage() {
 
       {/* Message Generator */}
       <MessageGenerator />
+
+      {/* Message History */}
+      <MessageHistory />
 
       {/* Template Examples */}
       <Card>
@@ -69,25 +86,41 @@ export default function MessagesPage() {
           <div className="space-y-2">
             <h4 className="font-medium text-sm">Confirmación de Pedido</h4>
             <p className="text-sm text-gray-600 bg-gray-50 p-3 rounded">
-              &ldquo;Hola {`{clientName}`}, tu pedido ha sido registrado con éxito. Te avisaremos cuando esté listo.&rdquo;
+              &ldquo;Hola {`{clientName}`}, tu pedido &apos;{`{orderDescription}`}&apos; está confirmado 🚀&rdquo;
             </p>
-            <p className="text-xs text-gray-500">Variables: clientName</p>
+            <p className="text-xs text-gray-500">Variables: clientName, orderDescription</p>
           </div>
 
           <div className="space-y-2">
             <h4 className="font-medium text-sm">Recordatorio de Pedido</h4>
             <p className="text-sm text-gray-600 bg-gray-50 p-3 rounded">
-              &ldquo;Hola {`{clientName}`}, te recordamos que tu pedido del {`{orderDate}`} sigue en estado: {`{orderStatus}`}.&rdquo;
+              &ldquo;Hola {`{clientName}`}, te recordamos que tienes pendiente: &apos;{`{orderDescription}`}&apos; 📦&rdquo;
             </p>
-            <p className="text-xs text-gray-500">Variables: clientName, orderDate, orderStatus</p>
+            <p className="text-xs text-gray-500">Variables: clientName, orderDescription</p>
           </div>
 
           <div className="space-y-2">
             <h4 className="font-medium text-sm">Seguimiento de Pedido</h4>
             <p className="text-sm text-gray-600 bg-gray-50 p-3 rounded">
-              &ldquo;Hola {`{clientName}`}, tu pedido está ahora en estado: {`{orderStatus}`}. Gracias por confiar en nosotros.&rdquo;
+              &ldquo;Hola {`{clientName}`}, ¿cómo va tu pedido &apos;{`{orderDescription}`}&apos;?&rdquo;
             </p>
-            <p className="text-xs text-gray-500">Variables: clientName, orderStatus</p>
+            <p className="text-xs text-gray-500">Variables: clientName, orderDescription</p>
+          </div>
+
+          <div className="space-y-2">
+            <h4 className="font-medium text-sm">Entrega de Pedido</h4>
+            <p className="text-sm text-gray-600 bg-gray-50 p-3 rounded">
+              &ldquo;Hola {`{clientName}`}, tu pedido &apos;{`{orderDescription}`}&apos; está listo para entrega ✅&rdquo;
+            </p>
+            <p className="text-xs text-gray-500">Variables: clientName, orderDescription</p>
+          </div>
+
+          <div className="space-y-2">
+            <h4 className="font-medium text-sm">Agradecimiento</h4>
+            <p className="text-sm text-gray-600 bg-gray-50 p-3 rounded">
+              &ldquo;Hola {`{clientName}`}, ¡gracias por tu pedido &apos;{`{orderDescription}`}&apos;!&rdquo;
+            </p>
+            <p className="text-xs text-gray-500">Variables: clientName, orderDescription</p>
           </div>
         </CardContent>
       </Card>

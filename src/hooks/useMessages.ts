@@ -1,10 +1,13 @@
-import { useMutation } from '@tanstack/react-query';
+import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { messagesApi } from '@/lib/api/messages';
+import { MessageFilters } from '@/lib/types';
 import { toast } from 'sonner';
 import { getErrorMessage } from '@/lib/types/errors';
 
 export const useMessages = () => {
-  // Mutación para generar mensaje desde template
+  const queryClient = useQueryClient();
+
+  // Mutación para generar mensaje desde template (función existente)
   const generateMutation = useMutation({
     mutationFn: messagesApi.generateTemplate,
     onSuccess: (data) => {
@@ -30,10 +33,59 @@ export const useMessages = () => {
     },
   });
 
+  // Mutación para enviar mensaje real
+  const sendMessageMutation = useMutation({
+    mutationFn: messagesApi.sendMessage,
+    onSuccess: (data) => {
+      console.log('Mensaje enviado:', data);
+      toast.success('Mensaje enviado correctamente');
+      
+      // Invalidar queries de mensajes para refrescar el historial
+      queryClient.invalidateQueries({ queryKey: ['messages'] });
+    },
+    onError: (error: unknown) => {
+      const message = getErrorMessage(error) || 'Error al enviar el mensaje';
+      toast.error(message);
+    },
+  });
+
   return {
+    // Funciones existentes
     generateMessage: generateMutation.mutate,
     generatedText: generateMutation.data?.message,
     isGenerating: generateMutation.isPending,
     error: generateMutation.error,
+    
+    // Nuevas funciones
+    sendMessage: sendMessageMutation.mutate,
+    isSending: sendMessageMutation.isPending,
+    sendError: sendMessageMutation.error,
   };
+};
+
+// Hook para obtener historial de mensajes
+export const useMessageHistory = (filters?: MessageFilters) => {
+  return useQuery({
+    queryKey: ['messages', filters],
+    queryFn: () => messagesApi.getMessages(filters),
+    staleTime: 30000, // 30 segundos
+  });
+};
+
+// Hook para obtener un mensaje específico
+export const useMessage = (id: string) => {
+  return useQuery({
+    queryKey: ['message', id],
+    queryFn: () => messagesApi.getMessage(id),
+    enabled: !!id,
+  });
+};
+
+// Hook para obtener templates disponibles
+export const useTemplates = () => {
+  return useQuery({
+    queryKey: ['templates'],
+    queryFn: messagesApi.getTemplates,
+    staleTime: 5 * 60 * 1000, // 5 minutos
+  });
 };

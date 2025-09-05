@@ -6,9 +6,11 @@ import { Button } from '@/components/ui/button';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
-import { Edit, Trash2, Package, User } from 'lucide-react';
+import { Edit, Trash2, Package, User, MessageSquare } from 'lucide-react';
 import { OrderForm } from './OrderForm';
 import { OrderUpdateFormData } from '@/lib/validations';
+import { useMessageHistory } from '@/hooks/useMessages';
+import SendMessageModal from '../messages/SendMessageModal';
 
 interface OrdersTableProps {
   orders: Order[];
@@ -43,6 +45,9 @@ export function OrdersTable({
 }: OrdersTableProps) {
   const [editingOrder, setEditingOrder] = useState<Order | null>(null);
   const [isFormOpen, setIsFormOpen] = useState(false);
+  const [sendMessageOrder, setSendMessageOrder] = useState<Order | null>(null);
+  const [isSendModalOpen, setIsSendModalOpen] = useState(false);
+  const { data: messages = [] } = useMessageHistory();
 
   const handleEdit = (order: Order) => {
     setEditingOrder(order);
@@ -61,6 +66,15 @@ export function OrdersTable({
     if (confirm('¿Estás seguro de que quieres eliminar este pedido?')) {
       onDelete(id);
     }
+  };
+
+  const handleSendMessage = (order: Order) => {
+    setSendMessageOrder(order);
+    setIsSendModalOpen(true);
+  };
+
+  const getMessageCount = (orderId: string) => {
+    return messages.filter(message => message.orderId === orderId).length;
   };
 
   const handleCloseForm = () => {
@@ -122,6 +136,12 @@ export function OrdersTable({
                         <div>
                           <div className="font-medium">{order.description}</div>
                           <div className="text-sm text-gray-500">ID: {order.id.slice(0, 8)}...</div>
+                          <div className="flex items-center space-x-2 text-xs text-gray-500 mt-1">
+                            <MessageSquare className="h-3 w-3" />
+                            <span>
+                              {getMessageCount(order.id)} mensaje{getMessageCount(order.id) !== 1 ? 's' : ''}
+                            </span>
+                          </div>
                         </div>
                       </div>
                     </TableCell>
@@ -138,6 +158,14 @@ export function OrdersTable({
                     </TableCell>
                     <TableCell className="text-right">
                       <div className="flex justify-end space-x-2">
+                        <Button
+                          variant="outline"
+                          size="sm"
+                          onClick={() => handleSendMessage(order)}
+                          title="Enviar mensaje"
+                        >
+                          <MessageSquare className="h-4 w-4" />
+                        </Button>
                         <Button
                           variant="outline"
                           size="sm"
@@ -175,6 +203,16 @@ export function OrdersTable({
         title="Editar Pedido"
         description="Modifica la información del pedido"
         isUpdate={true}
+      />
+
+      <SendMessageModal
+        isOpen={isSendModalOpen}
+        onClose={() => {
+          setIsSendModalOpen(false);
+          setSendMessageOrder(null);
+        }}
+        clientId={sendMessageOrder?.clientId}
+        orderId={sendMessageOrder?.id}
       />
     </>
   );

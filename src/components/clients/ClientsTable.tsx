@@ -5,11 +5,13 @@ import { Client } from '@/lib/types';
 import { Button } from '@/components/ui/button';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-import { Edit, Trash2, Phone, Mail, User } from 'lucide-react';
+import { Edit, Trash2, Phone, Mail, User, MessageSquare } from 'lucide-react';
 import { ClientForm } from './ClientForm';
 import { ClientUpdateFormData } from '@/lib/validations';
 import { useOrders } from '@/hooks/useOrders';
+import { useMessageHistory } from '@/hooks/useMessages';
 import { toast } from 'sonner';
+import SendMessageModal from '../messages/SendMessageModal';
 
 interface ClientsTableProps {
   clients: Client[];
@@ -28,7 +30,10 @@ export function ClientsTable({
 }: ClientsTableProps) {
   const [editingClient, setEditingClient] = useState<Client | null>(null);
   const [isFormOpen, setIsFormOpen] = useState(false);
+  const [sendMessageClient, setSendMessageClient] = useState<Client | null>(null);
+  const [isSendModalOpen, setIsSendModalOpen] = useState(false);
   const { orders } = useOrders();
+  const { data: messages = [] } = useMessageHistory();
 
   const handleEdit = (client: Client) => {
     setEditingClient(client);
@@ -55,6 +60,15 @@ export function ClientsTable({
     if (confirm('¿Estás seguro de que quieres eliminar este cliente?')) {
       onDelete(id);
     }
+  };
+
+  const handleSendMessage = (client: Client) => {
+    setSendMessageClient(client);
+    setIsSendModalOpen(true);
+  };
+
+  const getMessageCount = (clientId: string) => {
+    return messages.filter(message => message.clientId === clientId).length;
   };
 
   const handleCloseForm = () => {
@@ -125,10 +139,25 @@ export function ClientsTable({
                             <span>{client.email}</span>
                           </div>
                         )}
+                        <div className="flex items-center space-x-2 text-sm">
+                          <MessageSquare className="h-3 w-3 text-gray-400" />
+                          <span className="text-gray-500">
+                            {getMessageCount(client.id)} mensaje{getMessageCount(client.id) !== 1 ? 's' : ''}
+                          </span>
+                        </div>
                       </div>
                     </TableCell>
                     <TableCell className="text-right">
                       <div className="flex justify-end space-x-2">
+                        <Button
+                          variant="outline"
+                          size="sm"
+                          onClick={() => handleSendMessage(client)}
+                          disabled={!client.phone}
+                          title={!client.phone ? "El cliente debe tener teléfono para enviar mensajes" : "Enviar mensaje"}
+                        >
+                          <MessageSquare className="h-4 w-4" />
+                        </Button>
                         <Button
                           variant="outline"
                           size="sm"
@@ -164,6 +193,15 @@ export function ClientsTable({
         client={editingClient}
         title="Editar Cliente"
         description="Modifica la información del cliente"
+      />
+
+      <SendMessageModal
+        isOpen={isSendModalOpen}
+        onClose={() => {
+          setIsSendModalOpen(false);
+          setSendMessageClient(null);
+        }}
+        clientId={sendMessageClient?.id}
       />
     </>
   );
