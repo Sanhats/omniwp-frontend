@@ -6,11 +6,24 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Eye, EyeOff, RefreshCw } from 'lucide-react';
+import { User } from '@/lib/types';
+
+interface LocalStorageData {
+  authStore: {
+    state?: {
+      user?: User | null;
+      token?: string | null;
+      isAuthenticated?: boolean;
+    };
+  };
+  directToken: string | null;
+  directUser: User | null;
+}
 
 export function AuthDebug() {
   const { user, token, isAuthenticated } = useAuthStore();
   const [showToken, setShowToken] = useState(false);
-  const [localStorageData, setLocalStorageData] = useState<any>(null);
+  const [localStorageData, setLocalStorageData] = useState<LocalStorageData | null>(null);
 
   const refreshData = () => {
     const authStore = JSON.parse(localStorage.getItem('auth-storage') || '{}');
