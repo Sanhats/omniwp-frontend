@@ -15,35 +15,49 @@ interface ConnectWhatsAppModalProps {
 export function ConnectWhatsAppModal({ open, onOpenChange }: ConnectWhatsAppModalProps) {
   const [qrCode, setQrCode] = useState<string>('');
   const [isConnecting, setIsConnecting] = useState(false);
+  const [error, setError] = useState<string>('');
   const { data: status, refetch } = useWhatsAppStatus();
 
   useEffect(() => {
     if (!open) return;
 
+    // Limpiar estados al abrir el modal
+    setQrCode('');
+    setError('');
+    setIsConnecting(false);
+
     // Escuchar eventos de QR desde el WebSocket
     const handleQR = (event: CustomEvent) => {
+      console.log('QR recibido:', event.detail);
       setQrCode(event.detail.qr);
       setIsConnecting(true);
+      setError('');
     };
 
     const handleStatus = (event: CustomEvent) => {
+      console.log('Estado WhatsApp recibido:', event.detail);
       const { status: newStatus, message, phoneNumber } = event.detail;
       
       if (newStatus === 'connected') {
         setIsConnecting(false);
+        setError('');
         toast.success(`¡WhatsApp conectado con éxito! Número: ${phoneNumber}`);
         onOpenChange(false);
         refetch();
       } else if (newStatus === 'error') {
         setIsConnecting(false);
+        setError(message || 'Error al conectar WhatsApp');
         toast.error(message || 'Error al conectar WhatsApp');
       } else if (newStatus === 'connecting') {
         setIsConnecting(true);
+        setError('');
       }
     };
 
     const handleError = (event: CustomEvent) => {
+      console.error('Error WhatsApp:', event.detail);
       setIsConnecting(false);
+      setError(event.detail.message || 'Error de conexión');
       toast.error(event.detail.message || 'Error de conexión');
     };
 
@@ -61,6 +75,7 @@ export function ConnectWhatsAppModal({ open, onOpenChange }: ConnectWhatsAppModa
   const handleClose = () => {
     setQrCode('');
     setIsConnecting(false);
+    setError('');
     onOpenChange(false);
   };
 
@@ -78,12 +93,26 @@ export function ConnectWhatsAppModal({ open, onOpenChange }: ConnectWhatsAppModa
         </DialogHeader>
 
         <div className="space-y-4">
-          {!qrCode && !isConnecting && (
+          {!qrCode && !isConnecting && !error && (
             <div className="flex flex-col items-center space-y-4 py-8">
               <Loader2 className="h-8 w-8 animate-spin text-blue-500" />
               <p className="text-sm text-muted-foreground">
                 Generando código QR...
               </p>
+            </div>
+          )}
+
+          {error && (
+            <div className="flex flex-col items-center space-y-4 py-4">
+              <AlertCircle className="h-12 w-12 text-red-500" />
+              <div className="text-center">
+                <p className="text-sm font-medium text-red-700">
+                  Error al conectar WhatsApp
+                </p>
+                <p className="text-xs text-muted-foreground mt-1">
+                  {error}
+                </p>
+              </div>
             </div>
           )}
 

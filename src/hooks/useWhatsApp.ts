@@ -52,6 +52,7 @@ export const useConnectWhatsApp = () => {
   return useMutation({
     mutationFn: whatsappApi.connectAuth, // Usar endpoint autenticado
     onSuccess: (data) => {
+      console.log('Respuesta de conexión WhatsApp:', data);
       if (data.success) {
         toast.success('Iniciando conexión de WhatsApp...');
         // Invalidar queries relacionadas
@@ -61,6 +62,7 @@ export const useConnectWhatsApp = () => {
       }
     },
     onError: (error) => {
+      console.error('Error al conectar WhatsApp:', error);
       toast.error('Error al conectar WhatsApp: ' + error.message);
     },
   });

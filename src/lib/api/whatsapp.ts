@@ -13,12 +13,21 @@ const getAuthHeaders = () => {
   const authStore = JSON.parse(localStorage.getItem('auth-storage') || '{}');
   const token = authStore?.state?.token;
   
-  if (!token) {
+  // También intentar obtener el token directamente del localStorage como fallback
+  const directToken = localStorage.getItem('token');
+  const finalToken = token || directToken;
+  
+  if (!finalToken) {
+    console.error('No hay token de autenticación disponible');
+    console.log('Auth store:', authStore);
+    console.log('Direct token:', directToken);
     throw new Error('No hay token de autenticación disponible');
   }
   
+  console.log('Token encontrado:', finalToken.substring(0, 20) + '...');
+  
   return {
-    'Authorization': `Bearer ${token}`,
+    'Authorization': `Bearer ${finalToken}`,
     'Content-Type': 'application/json',
   };
 };

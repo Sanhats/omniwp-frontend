@@ -1,8 +1,9 @@
 'use client';
 
 import { WhatsAppStatusCard } from '@/components/whatsapp/WhatsAppStatusCard';
+import { AuthDebug } from '@/components/debug/AuthDebug';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-import { Settings, Smartphone, MessageSquare } from 'lucide-react';
+import { Settings, Smartphone, MessageSquare, Bug } from 'lucide-react';
 
 export default function SettingsPage() {
   return (
@@ -43,6 +44,24 @@ export default function SettingsPage() {
           </CardContent>
         </Card>
       </div>
+
+      {/* Debug de Autenticación - Solo mostrar en desarrollo */}
+      {process.env.NODE_ENV === 'development' && (
+        <Card>
+          <CardHeader>
+            <CardTitle className="flex items-center space-x-2">
+              <Bug className="h-5 w-5" />
+              <span>Debug de Autenticación</span>
+            </CardTitle>
+            <CardDescription>
+              Herramientas de debug para diagnosticar problemas de autenticación
+            </CardDescription>
+          </CardHeader>
+          <CardContent>
+            <AuthDebug />
+          </CardContent>
+        </Card>
+      )}
 
       <Card>
         <CardHeader>

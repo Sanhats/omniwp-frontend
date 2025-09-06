@@ -17,10 +17,15 @@ export function WhatsAppStatusCard() {
   const disconnectMutation = useDisconnectWhatsApp();
 
   const handleConnect = () => {
+    console.log('Iniciando conexión WhatsApp...');
     connectMutation.mutate(undefined, {
-      onSuccess: () => {
+      onSuccess: (data) => {
+        console.log('Conexión exitosa:', data);
         setShowConnectModal(true);
         refetchInfo();
+      },
+      onError: (error) => {
+        console.error('Error en conexión:', error);
       }
     });
   };
