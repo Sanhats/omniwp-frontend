@@ -235,13 +235,13 @@ export default function SendMessageModal({ isOpen, onClose, clientId, orderId }:
           {/* Selección de Canal */}
           <div className="space-y-2">
             <Label htmlFor="channel">Canal *</Label>
-            <div className="flex items-center gap-2 p-3 bg-gray-50 rounded-md border">
-              <Smartphone className="h-4 w-4 text-green-600" />
+            <div className="flex items-center gap-2 p-3 bg-yellow-50 rounded-md border border-yellow-200">
+              <Smartphone className="h-4 w-4 text-yellow-600" />
               <span className="text-sm font-medium">WhatsApp</span>
-              <Badge variant="secondary" className="ml-auto">Disponible</Badge>
+              <Badge variant="outline" className="ml-auto text-yellow-700 border-yellow-300">Configurando</Badge>
             </div>
-            <p className="text-xs text-gray-500">
-              Email estará disponible próximamente
+            <p className="text-xs text-yellow-600">
+              ⚠️ WhatsApp está en configuración. Los mensajes se guardarán pero no se enviarán automáticamente.
             </p>
           </div>
 

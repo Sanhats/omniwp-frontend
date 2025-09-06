@@ -44,6 +44,25 @@ export const useMessages = () => {
       queryClient.invalidateQueries({ queryKey: ['messages'] });
     },
     onError: (error: unknown) => {
+      console.error('Error enviando mensaje:', error);
+      
+      // Manejar error específico de Twilio no configurado
+      if (error && typeof error === 'object' && 'data' in error) {
+        const errorData = error.data as { code?: string; details?: string };
+        if (errorData?.code === 'SEND_FAILED' && errorData?.details?.includes('Twilio WhatsApp no está configurado')) {
+          toast.error('WhatsApp no está configurado en el servidor. Contacta al administrador.', {
+            duration: 5000,
+            action: {
+              label: 'Ver detalles',
+              onClick: () => {
+                console.log('Detalles del error:', errorData);
+              }
+            }
+          });
+          return;
+        }
+      }
+      
       const message = getErrorMessage(error) || 'Error al enviar el mensaje';
       toast.error(message);
     },
