@@ -55,6 +55,7 @@ export const useConnectWhatsApp = () => {
       console.log('🔗 Hook onSuccess - Respuesta de conexión WhatsApp:', data);
       console.log('🔗 Hook onSuccess - data.success:', data.success);
       console.log('🔗 Hook onSuccess - data.status:', data.status);
+      console.log('🔗 Hook onSuccess - data.qrCode:', data.qrCode ? 'Presente' : 'No presente');
       
       if (data.success) {
         toast.success('Iniciando conexión de WhatsApp...');

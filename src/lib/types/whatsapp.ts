@@ -38,7 +38,8 @@ export interface SendWhatsAppMessageRequest {
 export interface WhatsAppConnectionResponse {
   success: boolean;
   message: string;
-  qr?: string;
+  status?: 'qr_generated' | 'connected' | 'error';
+  qrCode?: string;
 }
 
 export interface WhatsAppError {

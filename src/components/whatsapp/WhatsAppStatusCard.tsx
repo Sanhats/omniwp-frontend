@@ -11,7 +11,7 @@ import { Loader2, Smartphone, Wifi, WifiOff, AlertCircle } from 'lucide-react';
 export function WhatsAppStatusCard() {
   const [showConnectModal, setShowConnectModal] = useState(false);
   const { data: status, isLoading: statusLoading, error: statusError } = useWhatsAppStatus();
-  const { data: info, refetch: refetchInfo } = useWhatsAppInfo();
+  const { data: info } = useWhatsAppInfo();
   const { data: availability, error: availabilityError } = useWhatsAppAvailability();
   const connectMutation = useConnectWhatsApp();
   const disconnectMutation = useDisconnectWhatsApp();
@@ -31,6 +31,7 @@ export function WhatsAppStatusCard() {
         console.log('✅ Componente onSuccess - Conexión exitosa:', data);
         console.log('✅ Componente onSuccess - data.success:', data.success);
         console.log('✅ Componente onSuccess - data.status:', data.status);
+        console.log('✅ Componente onSuccess - data.qrCode:', data.qrCode ? 'Presente' : 'No presente');
         console.log('✅ Componente onSuccess - Abriendo modal...');
         setShowConnectModal(true);
         console.log('✅ Componente onSuccess - Modal abierto:', true);
