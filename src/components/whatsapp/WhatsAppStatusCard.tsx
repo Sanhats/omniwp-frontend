@@ -7,6 +7,7 @@ import { useWhatsAppStatus, useWhatsAppInfo, useConnectWhatsApp, useDisconnectWh
 import { ConnectWhatsAppModal } from './ConnectWhatsAppModal';
 import { useState } from 'react';
 import { Loader2, Smartphone, Wifi, WifiOff, AlertCircle } from 'lucide-react';
+import { toast } from 'sonner';
 
 export function WhatsAppStatusCard() {
   const [showConnectModal, setShowConnectModal] = useState(false);
