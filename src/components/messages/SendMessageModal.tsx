@@ -74,6 +74,19 @@ export default function SendMessageModal({ isOpen, onClose, clientId, orderId }:
   const selectedClient = clients?.find(c => c.id === selectedClientId);
   const selectedOrder = orders?.find(o => o.id === selectedOrderId);
 
+  // Debug logs
+  console.log('SendMessageModal Debug:', {
+    clients: clients?.length || 0,
+    orders: orders?.length || 0,
+    templates: templates ? 'loaded' : 'not loaded',
+    selectedClientId,
+    selectedOrderId,
+    selectedTemplate,
+    selectedClient: selectedClient?.name,
+    selectedOrder: selectedOrder?.description,
+    previewText: previewText ? 'generated' : 'not generated'
+  });
+
   // Generar vista previa cuando cambien los datos
   useEffect(() => {
     if (selectedClient && selectedOrder && selectedTemplate && templates) {
@@ -313,7 +326,7 @@ export default function SendMessageModal({ isOpen, onClose, clientId, orderId }:
             </Button>
             <Button
               type="submit"
-              disabled={isSending || !previewText}
+              disabled={isSending || !selectedClientId || !selectedOrderId || !selectedTemplate}
               className="flex items-center gap-2"
             >
               {isSending ? (
