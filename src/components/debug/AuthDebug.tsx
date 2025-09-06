@@ -131,33 +131,68 @@ export function AuthDebug() {
         {/* Verificación de Headers */}
         <div>
           <h4 className="font-medium mb-2">Verificación de Headers de API</h4>
-          <Button
-            variant="outline"
-            size="sm"
-            onClick={() => {
-              try {
-                const authStore = JSON.parse(localStorage.getItem('auth-storage') || '{}');
-                const token = authStore?.state?.token;
-                const directToken = localStorage.getItem('token');
-                const finalToken = token || directToken;
-                
-                if (finalToken) {
-                  console.log('Headers que se enviarían:', {
-                    'Authorization': `Bearer ${finalToken}`,
-                    'Content-Type': 'application/json',
-                  });
-                  alert('Headers generados correctamente. Revisa la consola.');
-                } else {
-                  alert('No se pudo generar el token para los headers.');
+          <div className="space-y-2">
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={() => {
+                try {
+                  const authStore = JSON.parse(localStorage.getItem('auth-storage') || '{}');
+                  const token = authStore?.state?.token;
+                  const directToken = localStorage.getItem('token');
+                  const finalToken = token || directToken;
+                  
+                  if (finalToken) {
+                    console.log('Headers que se enviarían:', {
+                      'Authorization': `Bearer ${finalToken}`,
+                      'Content-Type': 'application/json',
+                    });
+                    alert('Headers generados correctamente. Revisa la consola.');
+                  } else {
+                    alert('No se pudo generar el token para los headers.');
+                  }
+                } catch (error) {
+                  console.error('Error generando headers:', error);
+                  alert('Error generando headers. Revisa la consola.');
                 }
-              } catch (error) {
-                console.error('Error generando headers:', error);
-                alert('Error generando headers. Revisa la consola.');
-              }
-            }}
-          >
-            Probar Generación de Headers
-          </Button>
+              }}
+            >
+              Probar Generación de Headers
+            </Button>
+            
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={() => {
+                try {
+                  const authStore = JSON.parse(localStorage.getItem('auth-storage') || '{}');
+                  const token = authStore?.state?.token;
+                  const directToken = localStorage.getItem('token');
+                  const finalToken = token || directToken;
+                  
+                  if (finalToken) {
+                    // Decodificar JWT
+                    const base64Url = finalToken.split('.')[1];
+                    const base64 = base64Url.replace(/-/g, '+').replace(/_/g, '/');
+                    const jsonPayload = decodeURIComponent(atob(base64).split('').map(function(c) {
+                      return '%' + ('00' + c.charCodeAt(0).toString(16)).slice(-2);
+                    }).join(''));
+                    const decoded = JSON.parse(jsonPayload);
+                    
+                    console.log('JWT decodificado:', decoded);
+                    alert(`JWT decodificado:\nuserId: ${decoded.userId}\nemail: ${decoded.email}\nRevisa la consola para más detalles.`);
+                  } else {
+                    alert('No hay token disponible para decodificar.');
+                  }
+                } catch (error) {
+                  console.error('Error decodificando JWT:', error);
+                  alert('Error decodificando JWT. Revisa la consola.');
+                }
+              }}
+            >
+              Decodificar JWT
+            </Button>
+          </div>
         </div>
       </CardContent>
     </Card>

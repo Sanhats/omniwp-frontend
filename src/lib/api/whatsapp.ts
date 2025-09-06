@@ -8,6 +8,21 @@ import {
 
 const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3001';
 
+// Función para decodificar JWT (solo para debug)
+const decodeJWT = (token: string) => {
+  try {
+    const base64Url = token.split('.')[1];
+    const base64 = base64Url.replace(/-/g, '+').replace(/_/g, '/');
+    const jsonPayload = decodeURIComponent(atob(base64).split('').map(function(c) {
+      return '%' + ('00' + c.charCodeAt(0).toString(16)).slice(-2);
+    }).join(''));
+    return JSON.parse(jsonPayload);
+  } catch (error) {
+    console.error('Error decodificando JWT:', error);
+    return null;
+  }
+};
+
 const getAuthHeaders = () => {
   // Obtener el token del store de Zustand
   const authStore = JSON.parse(localStorage.getItem('auth-storage') || '{}');
@@ -25,6 +40,14 @@ const getAuthHeaders = () => {
   }
   
   console.log('Token encontrado:', finalToken.substring(0, 20) + '...');
+  
+  // Decodificar JWT para verificar contenido
+  const decodedToken = decodeJWT(finalToken);
+  if (decodedToken) {
+    console.log('JWT decodificado:', decodedToken);
+    console.log('userId en JWT:', decodedToken.userId);
+    console.log('email en JWT:', decodedToken.email);
+  }
   
   return {
     'Authorization': `Bearer ${finalToken}`,
@@ -68,16 +91,27 @@ export const whatsappApi = {
 
   // Conectar WhatsApp autenticado (nuevo endpoint)
   async connectAuth(): Promise<WhatsAppConnectionResponse> {
+    const headers = getAuthHeaders();
+    console.log('Enviando request a:', `${API_BASE_URL}/whatsapp/connect-auth`);
+    console.log('Headers enviados:', headers);
+    
     const response = await fetch(`${API_BASE_URL}/whatsapp/connect-auth`, {
       method: 'POST',
-      headers: getAuthHeaders(),
+      headers,
     });
     
+    console.log('Response status:', response.status);
+    console.log('Response headers:', Object.fromEntries(response.headers.entries()));
+    
     if (!response.ok) {
-      throw new Error('Error al conectar WhatsApp');
+      const errorText = await response.text();
+      console.error('Error response:', errorText);
+      throw new Error(`Error al conectar WhatsApp: ${response.status} - ${errorText}`);
     }
     
-    return response.json();
+    const data = await response.json();
+    console.log('Response data:', data);
+    return data;
   },
 
   // Desconectar WhatsApp
