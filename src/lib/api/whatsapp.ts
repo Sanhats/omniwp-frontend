@@ -19,7 +19,7 @@ const getAuthHeaders = () => {
 export const whatsappApi = {
   // Obtener estado de conexión
   async getStatus(): Promise<WhatsAppStatus> {
-    const response = await fetch(`${API_BASE_URL}/api/v1/whatsapp/status`, {
+    const response = await fetch(`${API_BASE_URL}/whatsapp/status`, {
       headers: getAuthHeaders(),
     });
     
@@ -32,7 +32,7 @@ export const whatsappApi = {
 
   // Conectar WhatsApp (inicia el proceso de QR)
   async connect(): Promise<WhatsAppConnectionResponse> {
-    const response = await fetch(`${API_BASE_URL}/api/v1/whatsapp/connect`, {
+    const response = await fetch(`${API_BASE_URL}/whatsapp/connect`, {
       method: 'POST',
       headers: getAuthHeaders(),
     });
@@ -46,7 +46,7 @@ export const whatsappApi = {
 
   // Desconectar WhatsApp
   async disconnect(): Promise<{ success: boolean; message: string }> {
-    const response = await fetch(`${API_BASE_URL}/api/v1/whatsapp/disconnect`, {
+    const response = await fetch(`${API_BASE_URL}/whatsapp/disconnect`, {
       method: 'POST',
       headers: getAuthHeaders(),
     });
@@ -60,7 +60,7 @@ export const whatsappApi = {
 
   // Restaurar sesión de WhatsApp
   async restore(): Promise<WhatsAppConnectionResponse> {
-    const response = await fetch(`${API_BASE_URL}/api/v1/whatsapp/restore`, {
+    const response = await fetch(`${API_BASE_URL}/whatsapp/restore`, {
       method: 'POST',
       headers: getAuthHeaders(),
     });
@@ -74,7 +74,7 @@ export const whatsappApi = {
 
   // Obtener información del WhatsApp conectado
   async getInfo(): Promise<WhatsAppInfo> {
-    const response = await fetch(`${API_BASE_URL}/api/v1/whatsapp/info`, {
+    const response = await fetch(`${API_BASE_URL}/whatsapp/info`, {
       headers: getAuthHeaders(),
     });
     
@@ -96,7 +96,7 @@ export const whatsappApi = {
     if (filters?.offset) params.append('offset', filters.offset.toString());
     if (filters?.direction) params.append('direction', filters.direction);
 
-    const response = await fetch(`${API_BASE_URL}/api/v1/whatsapp/messages?${params}`, {
+    const response = await fetch(`${API_BASE_URL}/whatsapp/messages?${params}`, {
       headers: getAuthHeaders(),
     });
     
@@ -109,7 +109,7 @@ export const whatsappApi = {
 
   // Enviar mensaje por WhatsApp
   async sendMessage(data: SendWhatsAppMessageRequest): Promise<{ success: boolean; messageId: string }> {
-    const response = await fetch(`${API_BASE_URL}/api/v1/whatsapp/send`, {
+    const response = await fetch(`${API_BASE_URL}/whatsapp/send`, {
       method: 'POST',
       headers: getAuthHeaders(),
       body: JSON.stringify(data),
@@ -127,7 +127,7 @@ export const whatsappApi = {
     whatsappWeb: { enabled: boolean };
     features: { redis: boolean; websockets: boolean };
   }> {
-    const response = await fetch(`${API_BASE_URL}/api/v1/whatsapp/availability`, {
+    const response = await fetch(`${API_BASE_URL}/whatsapp/availability`, {
       headers: getAuthHeaders(),
     });
     
