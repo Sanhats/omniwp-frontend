@@ -16,17 +16,29 @@ export function WhatsAppStatusCard() {
   const connectMutation = useConnectWhatsApp();
   const disconnectMutation = useDisconnectWhatsApp();
 
+  // Debug del estado del modal
+  console.log('🔍 Componente - showConnectModal:', showConnectModal);
+  console.log('🔍 Componente - connectMutation.isPending:', connectMutation.isPending);
+  console.log('🔍 Componente - connectMutation.isSuccess:', connectMutation.isSuccess);
+  console.log('🔍 Componente - connectMutation.isError:', connectMutation.isError);
+
   const handleConnect = () => {
-    console.log('Iniciando conexión WhatsApp...');
+    console.log('🚀 Componente - Iniciando conexión WhatsApp...');
+    console.log('🚀 Componente - connectMutation.isPending:', connectMutation.isPending);
+    
     connectMutation.mutate(undefined, {
       onSuccess: (data) => {
-        console.log('Conexión exitosa:', data);
+        console.log('✅ Componente onSuccess - Conexión exitosa:', data);
+        console.log('✅ Componente onSuccess - data.success:', data.success);
+        console.log('✅ Componente onSuccess - data.status:', data.status);
+        console.log('✅ Componente onSuccess - Abriendo modal...');
         setShowConnectModal(true);
+        console.log('✅ Componente onSuccess - Modal abierto:', true);
         // No hacer refetch inmediato para evitar rate limiting
         // El refetch se hará automáticamente cuando se cierre el modal
       },
       onError: (error) => {
-        console.error('Error en conexión:', error);
+        console.error('❌ Componente onError - Error en conexión:', error);
       }
     });
   };
