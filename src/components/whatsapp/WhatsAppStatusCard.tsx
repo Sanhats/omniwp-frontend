@@ -10,9 +10,9 @@ import { Loader2, Smartphone, Wifi, WifiOff, AlertCircle } from 'lucide-react';
 
 export function WhatsAppStatusCard() {
   const [showConnectModal, setShowConnectModal] = useState(false);
-  const { data: status, isLoading: statusLoading } = useWhatsAppStatus();
+  const { data: status, isLoading: statusLoading, error: statusError } = useWhatsAppStatus();
   const { data: info, refetch: refetchInfo } = useWhatsAppInfo();
-  const { data: availability } = useWhatsAppAvailability();
+  const { data: availability, error: availabilityError } = useWhatsAppAvailability();
   const connectMutation = useConnectWhatsApp();
   const disconnectMutation = useDisconnectWhatsApp();
 
@@ -60,6 +60,8 @@ export function WhatsAppStatusCard() {
   };
 
   const isConnected = status?.status === 'connected';
+  const isServiceUnavailable = statusError?.message?.includes('503') || availabilityError?.message?.includes('503');
+  const isWhatsAppEnabled = availability?.whatsappWeb?.enabled && !isServiceUnavailable;
 
   return (
     <>
@@ -110,7 +112,7 @@ export function WhatsAppStatusCard() {
             {!isConnected ? (
               <Button 
                 onClick={handleConnect}
-                disabled={connectMutation.isPending || statusLoading || !availability?.whatsappWeb.enabled}
+                disabled={connectMutation.isPending || statusLoading || !isWhatsAppEnabled}
                 className="flex-1"
               >
                 {connectMutation.isPending ? (
@@ -142,7 +144,9 @@ export function WhatsAppStatusCard() {
           </div>
 
           <CardDescription className="text-xs">
-            {!availability?.whatsappWeb.enabled ? (
+            {isServiceUnavailable ? (
+              '⚠️ El servicio de WhatsApp Web no está disponible temporalmente. Se usará Twilio para todos los envíos.'
+            ) : !availability?.whatsappWeb.enabled ? (
               'WhatsApp Web no está disponible. Se usará Twilio para todos los envíos.'
             ) : isConnected ? (
               'Tu WhatsApp está conectado. Puedes enviar y recibir mensajes desde tu número personal.'

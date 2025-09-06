@@ -10,10 +10,10 @@ export const useWhatsAppStatus = (options?: { enabled?: boolean }) => {
     refetchInterval: false, // Deshabilitar auto-refresh
     refetchOnWindowFocus: false, // Deshabilitar refetch al enfocar ventana
     refetchOnMount: false, // Deshabilitar refetch al montar
-    retry: 1, // Solo 1 reintento
-    retryDelay: 10000, // Esperar 10 segundos entre reintentos
+    retry: false, // No reintentar en caso de error
     staleTime: 300000, // Los datos son válidos por 5 minutos
     enabled: options?.enabled !== false, // Permitir deshabilitar
+    throwOnError: false, // No lanzar error, solo devolverlo
   });
 };
 
@@ -136,9 +136,9 @@ export const useWhatsAppAvailability = (options?: { enabled?: boolean }) => {
     refetchInterval: false, // Deshabilitar auto-refresh
     refetchOnWindowFocus: false, // Deshabilitar refetch al enfocar ventana
     refetchOnMount: false, // Deshabilitar refetch al montar
-    retry: 1, // Solo 1 reintento
-    retryDelay: 15000, // Esperar 15 segundos entre reintentos
+    retry: false, // No reintentar en caso de error
     staleTime: 600000, // Los datos son válidos por 10 minutos
     enabled: options?.enabled !== false, // Permitir deshabilitar
+    throwOnError: false, // No lanzar error, solo devolverlo
   });
 };
