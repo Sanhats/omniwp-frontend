@@ -92,26 +92,42 @@ export const whatsappApi = {
   // Conectar WhatsApp autenticado (nuevo endpoint)
   async connectAuth(): Promise<WhatsAppConnectionResponse> {
     const headers = getAuthHeaders();
-    console.log('Enviando request a:', `${API_BASE_URL}/whatsapp/connect-auth`);
-    console.log('Headers enviados:', headers);
+    console.log('🌐 API - Enviando request a:', `${API_BASE_URL}/whatsapp/connect-auth`);
+    console.log('🌐 API - Headers enviados:', headers);
     
-    const response = await fetch(`${API_BASE_URL}/whatsapp/connect-auth`, {
-      method: 'POST',
-      headers,
-    });
-    
-    console.log('Response status:', response.status);
-    console.log('Response headers:', Object.fromEntries(response.headers.entries()));
-    
-    if (!response.ok) {
-      const errorText = await response.text();
-      console.error('Error response:', errorText);
-      throw new Error(`Error al conectar WhatsApp: ${response.status} - ${errorText}`);
+    try {
+      const response = await fetch(`${API_BASE_URL}/whatsapp/connect-auth`, {
+        method: 'POST',
+        headers,
+        // Agregar timeout más largo
+        signal: AbortSignal.timeout(30000), // 30 segundos
+      });
+      
+      console.log('🌐 API - Response status:', response.status);
+      console.log('🌐 API - Response ok:', response.ok);
+      console.log('🌐 API - Response headers:', Object.fromEntries(response.headers.entries()));
+      
+      if (!response.ok) {
+        const errorText = await response.text();
+        console.error('❌ API - Error response:', errorText);
+        throw new Error(`Error al conectar WhatsApp: ${response.status} - ${errorText}`);
+      }
+      
+      const data = await response.json();
+      console.log('✅ API - Response data recibida:', data);
+      console.log('✅ API - data.success:', data.success);
+      console.log('✅ API - data.status:', data.status);
+      console.log('✅ API - data.qrCode presente:', !!data.qrCode);
+      
+      return data;
+    } catch (error) {
+      console.error('❌ API - Error en fetch:', error);
+      if (error instanceof Error) {
+        console.error('❌ API - Error message:', error.message);
+        console.error('❌ API - Error name:', error.name);
+      }
+      throw error;
     }
-    
-    const data = await response.json();
-    console.log('Response data:', data);
-    return data;
   },
 
   // Desconectar WhatsApp
