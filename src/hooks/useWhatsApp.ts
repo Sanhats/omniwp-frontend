@@ -7,10 +7,12 @@ export const useWhatsAppStatus = (options?: { enabled?: boolean }) => {
   return useQuery({
     queryKey: ['whatsapp', 'status'],
     queryFn: whatsappApi.getStatus,
-    refetchInterval: 120000, // Auto-refresh cada 2 minutos (reducido)
-    retry: 2, // Reducir reintentos
-    retryDelay: 5000, // Esperar 5 segundos entre reintentos
-    staleTime: 60000, // Los datos son válidos por 1 minuto
+    refetchInterval: false, // Deshabilitar auto-refresh
+    refetchOnWindowFocus: false, // Deshabilitar refetch al enfocar ventana
+    refetchOnMount: false, // Deshabilitar refetch al montar
+    retry: 1, // Solo 1 reintento
+    retryDelay: 10000, // Esperar 10 segundos entre reintentos
+    staleTime: 300000, // Los datos son válidos por 5 minutos
     enabled: options?.enabled !== false, // Permitir deshabilitar
   });
 };
@@ -34,10 +36,12 @@ export const useWhatsAppMessages = (filters?: {
   return useQuery({
     queryKey: ['whatsapp', 'messages', filters],
     queryFn: () => whatsappApi.getMessages(filters),
-    refetchInterval: 60000, // Auto-refresh cada 1 minuto (reducido)
-    retry: 2, // Reducir reintentos
-    retryDelay: 5000, // Esperar 5 segundos entre reintentos
-    staleTime: 30000, // Los datos son válidos por 30 segundos
+    refetchInterval: false, // Deshabilitar auto-refresh
+    refetchOnWindowFocus: false, // Deshabilitar refetch al enfocar ventana
+    refetchOnMount: false, // Deshabilitar refetch al montar
+    retry: 1, // Solo 1 reintento
+    retryDelay: 10000, // Esperar 10 segundos entre reintentos
+    staleTime: 300000, // Los datos son válidos por 5 minutos
   });
 };
 
@@ -129,10 +133,12 @@ export const useWhatsAppAvailability = (options?: { enabled?: boolean }) => {
   return useQuery({
     queryKey: ['whatsapp', 'availability'],
     queryFn: whatsappApi.getAvailability,
-    refetchInterval: 600000, // Refrescar cada 10 minutos (reducido)
-    retry: 2, // Reducir reintentos
-    retryDelay: 10000, // Esperar 10 segundos entre reintentos
-    staleTime: 300000, // Los datos son válidos por 5 minutos
+    refetchInterval: false, // Deshabilitar auto-refresh
+    refetchOnWindowFocus: false, // Deshabilitar refetch al enfocar ventana
+    refetchOnMount: false, // Deshabilitar refetch al montar
+    retry: 1, // Solo 1 reintento
+    retryDelay: 15000, // Esperar 15 segundos entre reintentos
+    staleTime: 600000, // Los datos son válidos por 10 minutos
     enabled: options?.enabled !== false, // Permitir deshabilitar
   });
 };

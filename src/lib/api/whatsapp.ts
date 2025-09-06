@@ -9,7 +9,14 @@ import {
 const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3001';
 
 const getAuthHeaders = () => {
-  const token = localStorage.getItem('authToken');
+  // Obtener el token del store de Zustand
+  const authStore = JSON.parse(localStorage.getItem('auth-storage') || '{}');
+  const token = authStore?.state?.token;
+  
+  if (!token) {
+    throw new Error('No hay token de autenticación disponible');
+  }
+  
   return {
     'Authorization': `Bearer ${token}`,
     'Content-Type': 'application/json',
