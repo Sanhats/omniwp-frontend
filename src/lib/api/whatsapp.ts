@@ -226,8 +226,17 @@ export const whatsappApi = {
     success: boolean;
     message: string;
     token?: string;
-    decoded?: any;
-    user?: any;
+    decoded?: {
+      userId: string;
+      email: string;
+      iat: number;
+      exp: number;
+    };
+    user?: {
+      id: string;
+      email: string;
+      name: string;
+    };
   }> {
     const headers = getAuthHeaders();
     console.log('Probando endpoint /test-jwt...');
