@@ -126,3 +126,6 @@ export interface OrderUpdateForm {
   description?: string;
   status?: Order['status'];
 }
+
+// Re-export WhatsApp types
+export * from './whatsapp';

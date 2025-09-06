@@ -7,6 +7,7 @@ import { z } from 'zod';
 import { useMessages, useTemplates } from '@/hooks/useMessages';
 import { useClients } from '@/hooks/useClients';
 import { useOrders } from '@/hooks/useOrders';
+import { useWhatsAppStatus } from '@/hooks/useWhatsApp';
 import { MessageTemplates } from '@/lib/types';
 import {
   Dialog,
@@ -26,7 +27,6 @@ import { toast } from 'sonner';
 const sendMessageSchema = z.object({
   clientId: z.string().min(1, 'Debe seleccionar un cliente'),
   orderId: z.string().min(1, 'Debe seleccionar un pedido'),
-  channel: z.enum(['whatsapp']), // Temporalmente solo WhatsApp
   templateType: z.enum(['confirmacion', 'recordatorio', 'seguimiento', 'entrega', 'agradecimiento']),
 });
 
@@ -56,13 +56,13 @@ export default function SendMessageModal({ isOpen, onClose, clientId, orderId }:
   const { data: templates } = useTemplates();
   const { clients } = useClients();
   const { orders } = useOrders();
+  const { data: whatsappStatus } = useWhatsAppStatus();
 
   const form = useForm<SendMessageFormData>({
     resolver: zodResolver(sendMessageSchema),
     defaultValues: {
       clientId: clientId || '',
       orderId: orderId || '',
-      channel: 'whatsapp', // Solo WhatsApp por ahora
     },
   });
 
@@ -100,22 +100,23 @@ export default function SendMessageModal({ isOpen, onClose, clientId, orderId }:
     }
   }, [selectedClient, selectedOrder, selectedTemplate, templates]);
 
-  const handleSubmit = (data: SendMessageFormData) => {
+  const handleSubmit = async (data: SendMessageFormData) => {
     if (!selectedClient || !selectedOrder) {
       toast.error('Error: No se encontraron los datos del cliente o pedido');
       return;
     }
 
-    // Validar que el cliente tenga teléfono para WhatsApp
-    if (data.channel === 'whatsapp' && !selectedClient.phone) {
-      toast.error('El cliente debe tener un número de teléfono para enviar WhatsApp');
+    // Validar que el cliente tenga teléfono
+    if (!selectedClient.phone) {
+      toast.error('El cliente debe tener un número de teléfono para enviar mensajes');
       return;
     }
 
+    // El backend maneja automáticamente WhatsApp Web vs Twilio
     const messageData = {
       clientId: data.clientId,
       orderId: data.orderId,
-      channel: data.channel,
+      channel: 'whatsapp' as const, // El backend decide automáticamente qué usar
       templateType: data.templateType,
       variables: {
         clientName: selectedClient.name,
@@ -125,6 +126,8 @@ export default function SendMessageModal({ isOpen, onClose, clientId, orderId }:
 
     sendMessage(messageData, {
       onSuccess: () => {
+        const channelUsed = whatsappStatus?.status === 'connected' ? 'WhatsApp Web' : 'Twilio';
+        toast.success(`Mensaje enviado por ${channelUsed}`);
         form.reset();
         setPreviewText('');
         setShowPreview(false);
@@ -232,17 +235,36 @@ export default function SendMessageModal({ isOpen, onClose, clientId, orderId }:
             )}
           </div>
 
-          {/* Selección de Canal */}
+          {/* Información del Canal */}
           <div className="space-y-2">
-            <Label htmlFor="channel">Canal *</Label>
-            <div className="flex items-center gap-2 p-3 bg-yellow-50 rounded-md border border-yellow-200">
-              <Smartphone className="h-4 w-4 text-yellow-600" />
-              <span className="text-sm font-medium">WhatsApp</span>
-              <Badge variant="outline" className="ml-auto text-yellow-700 border-yellow-300">Configurando</Badge>
+            <Label>Canal de Envío</Label>
+            <div className="p-4 bg-blue-50 rounded-lg border border-blue-200">
+              <div className="flex items-center gap-3">
+                <Smartphone className="h-5 w-5 text-blue-600" />
+                <div className="flex-1">
+                  <div className="flex items-center gap-2 mb-1">
+                    <span className="font-medium text-sm">WhatsApp Inteligente</span>
+                    {whatsappStatus?.status === 'connected' ? (
+                      <Badge className="bg-green-500 hover:bg-green-600 text-xs">Usará tu WhatsApp</Badge>
+                    ) : (
+                      <Badge variant="outline" className="text-xs">Usará Twilio</Badge>
+                    )}
+                  </div>
+                  <p className="text-xs text-muted-foreground">
+                    {whatsappStatus?.status === 'connected' 
+                      ? 'El mensaje se enviará desde tu número personal de WhatsApp'
+                      : 'El mensaje se enviará usando el servicio de Twilio'
+                    }
+                  </p>
+                </div>
+              </div>
             </div>
-            <p className="text-xs text-yellow-600">
-              ⚠️ WhatsApp está en configuración. Los mensajes se guardarán pero no se enviarán automáticamente.
-            </p>
+            
+            {whatsappStatus?.status !== 'connected' && (
+              <p className="text-xs text-amber-600 flex items-center gap-1">
+                💡 <span>Conecta tu WhatsApp en Configuración para enviar desde tu número personal</span>
+              </p>
+            )}
           </div>
 
           {/* Selección de Template */}
@@ -337,7 +359,7 @@ export default function SendMessageModal({ isOpen, onClose, clientId, orderId }:
               ) : (
                 <>
                   <Send className="h-4 w-4" />
-                  Enviar Mensaje
+                  {whatsappStatus?.status === 'connected' ? 'Enviar por WhatsApp' : 'Enviar por Twilio'}
                 </>
               )}
             </Button>

@@ -8,6 +8,7 @@ import {
   Users, 
   Package, 
   MessageSquare, 
+  Settings,
   LogOut,
   Menu,
   X
@@ -21,6 +22,7 @@ const navigation = [
   { name: 'Clientes', href: '/dashboard/clients', icon: Users },
   { name: 'Pedidos', href: '/dashboard/orders', icon: Package },
   { name: 'Mensajes', href: '/dashboard/messages', icon: MessageSquare },
+  { name: 'Configuración', href: '/dashboard/settings', icon: Settings },
 ];
 
 export function Sidebar() {

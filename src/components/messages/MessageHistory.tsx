@@ -1,7 +1,8 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useMessageHistory } from '@/hooks/useMessages';
+import { useWhatsAppMessages } from '@/hooks/useWhatsApp';
 import { MessageFilters } from '@/lib/types';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
@@ -26,8 +27,9 @@ const statusConfig = {
 };
 
 const channelConfig = {
-  whatsapp: { label: 'WhatsApp', icon: Smartphone, color: 'text-green-600' },
-  email: { label: 'Email', icon: Mail, color: 'text-blue-600' },
+  whatsapp: { label: 'Twilio', icon: Smartphone, color: 'text-blue-600' },
+  whatsapp_web: { label: 'WhatsApp Web', icon: Smartphone, color: 'text-green-600' },
+  email: { label: 'Email', icon: Mail, color: 'text-gray-600' },
 };
 
 export default function MessageHistory({ clientId, orderId }: MessageHistoryProps) {
@@ -38,6 +40,29 @@ export default function MessageHistory({ clientId, orderId }: MessageHistoryProp
   const [searchTerm, setSearchTerm] = useState('');
 
   const { data: messages = [], isLoading, error, refetch } = useMessageHistory(filters);
+  const { data: whatsappMessages, isLoading: isLoadingWhatsApp } = useWhatsAppMessages({
+    limit: 50,
+    offset: 0
+  });
+
+  // Escuchar mensajes en tiempo real
+  useEffect(() => {
+    const handleWhatsAppMessage = () => {
+      refetch(); // Refrescar mensajes del sistema
+    };
+
+    const handleWhatsAppMessageSent = () => {
+      refetch(); // Refrescar mensajes del sistema
+    };
+
+    window.addEventListener('whatsapp:message', handleWhatsAppMessage);
+    window.addEventListener('whatsapp:message:sent', handleWhatsAppMessageSent);
+    
+    return () => {
+      window.removeEventListener('whatsapp:message', handleWhatsAppMessage);
+      window.removeEventListener('whatsapp:message:sent', handleWhatsAppMessageSent);
+    };
+  }, [refetch]);
 
   const handleFilterChange = (key: keyof MessageFilters, value: string) => {
     setFilters(prev => ({
@@ -51,7 +76,30 @@ export default function MessageHistory({ clientId, orderId }: MessageHistoryProp
     setSearchTerm('');
   };
 
-  const filteredMessages = (messages || []).filter(message =>
+  // Combinar mensajes del sistema y de WhatsApp
+  const allMessages = [
+    ...(messages || []).map(msg => ({
+      ...msg,
+      channel: msg.channel as 'whatsapp' | 'email',
+      direction: 'outgoing' as const,
+      messageType: 'text' as const,
+    })),
+    ...(whatsappMessages?.messages || []).map(msg => ({
+      id: msg.id,
+      clientId: '', // Los mensajes de WhatsApp no tienen clientId directo
+      orderId: '', // Los mensajes de WhatsApp no tienen orderId directo
+      channel: 'whatsapp_web' as const,
+      status: msg.status || 'sent',
+      text: msg.body,
+      createdAt: msg.timestamp,
+      updatedAt: msg.timestamp,
+      providerMessageId: msg.id,
+      direction: msg.direction,
+      messageType: msg.messageType || 'text',
+    }))
+  ];
+
+  const filteredMessages = allMessages.filter(message =>
     message.text.toLowerCase().includes(searchTerm.toLowerCase())
   );
 
@@ -71,7 +119,7 @@ export default function MessageHistory({ clientId, orderId }: MessageHistoryProp
     return `Cliente ${clientId.slice(-8)}`;
   };
 
-  if (isLoading) {
+  if (isLoading || isLoadingWhatsApp) {
     return (
       <Card>
         <CardHeader>
@@ -214,11 +262,16 @@ export default function MessageHistory({ clientId, orderId }: MessageHistoryProp
                     const statusInfo = statusConfig[message.status as keyof typeof statusConfig];
                     const channelInfo = channelConfig[message.channel as keyof typeof channelConfig];
                     const ChannelIcon = channelInfo.icon;
+                    const isIncoming = message.direction === 'incoming';
 
                     return (
                       <div
                         key={message.id}
-                        className="border rounded-lg p-3 hover:bg-gray-50 transition-colors"
+                        className={`border rounded-lg p-3 hover:bg-gray-50 transition-colors ${
+                          isIncoming 
+                            ? 'bg-green-50 border-green-200 ml-8' 
+                            : 'bg-blue-50 border-blue-200 mr-8'
+                        }`}
                       >
                         <div className="flex items-start justify-between mb-2">
                           <div className="flex items-center gap-2">
@@ -226,9 +279,20 @@ export default function MessageHistory({ clientId, orderId }: MessageHistoryProp
                             <span className="font-medium text-sm">
                               {channelInfo.label}
                             </span>
-                            <Badge className={statusInfo.color}>
-                              {statusInfo.label}
+                            <Badge 
+                              className={
+                                isIncoming 
+                                  ? 'bg-green-100 text-green-800' 
+                                  : statusInfo.color
+                              }
+                            >
+                              {isIncoming ? 'Recibido' : statusInfo.label}
                             </Badge>
+                            {isIncoming && (
+                              <Badge variant="outline" className="text-xs">
+                                Entrante
+                              </Badge>
+                            )}
                           </div>
                           <div className="flex items-center gap-2 text-sm text-gray-500">
                             <Calendar className="h-4 w-4" />
@@ -236,13 +300,19 @@ export default function MessageHistory({ clientId, orderId }: MessageHistoryProp
                           </div>
                         </div>
                         
-                        <p className="text-gray-700 mb-2 text-sm">{message.text}</p>
+                        <p className={`mb-2 text-sm ${
+                          isIncoming ? 'text-green-800' : 'text-gray-700'
+                        }`}>
+                          {message.text}
+                        </p>
                         
                         <div className="flex items-center gap-4 text-xs text-gray-500">
-                          <div className="flex items-center gap-1">
-                            <Package className="h-3 w-3" />
-                            Pedido: {message.orderId.slice(-8)}
-                          </div>
+                          {message.orderId && (
+                            <div className="flex items-center gap-1">
+                              <Package className="h-3 w-3" />
+                              Pedido: {message.orderId.slice(-8)}
+                            </div>
+                          )}
                           {message.providerMessageId && (
                             <div className="text-xs text-gray-400">
                               ID: {message.providerMessageId.slice(-8)}
