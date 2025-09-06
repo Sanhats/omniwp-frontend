@@ -144,3 +144,22 @@ export const useWhatsAppAvailability = (options?: { enabled?: boolean }) => {
     throwOnError: false, // No lanzar error, solo devolverlo
   });
 };
+
+// Hook para probar decodificación de JWT
+export const useTestJWT = () => {
+  return useMutation({
+    mutationFn: whatsappApi.testJWT,
+    onSuccess: (data) => {
+      console.log('Test JWT exitoso:', data);
+      if (data.success) {
+        toast.success('JWT decodificado correctamente');
+      } else {
+        toast.error(data.message || 'Error en test JWT');
+      }
+    },
+    onError: (error) => {
+      console.error('Error en test JWT:', error);
+      toast.error('Error en test JWT: ' + error.message);
+    },
+  });
+};

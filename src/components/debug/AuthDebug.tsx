@@ -5,8 +5,9 @@ import { useState, useEffect } from 'react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
-import { Eye, EyeOff, RefreshCw } from 'lucide-react';
+import { Eye, EyeOff, RefreshCw, TestTube } from 'lucide-react';
 import { User } from '@/lib/types';
+import { useTestJWT } from '@/hooks/useWhatsApp';
 
 interface LocalStorageData {
   authStore: {
@@ -24,6 +25,7 @@ export function AuthDebug() {
   const { user, token, isAuthenticated } = useAuthStore();
   const [showToken, setShowToken] = useState(false);
   const [localStorageData, setLocalStorageData] = useState<LocalStorageData | null>(null);
+  const testJWTMutation = useTestJWT();
 
   const refreshData = () => {
     const authStore = JSON.parse(localStorage.getItem('auth-storage') || '{}');
@@ -190,7 +192,21 @@ export function AuthDebug() {
                 }
               }}
             >
-              Decodificar JWT
+              Decodificar JWT (Frontend)
+            </Button>
+            
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={() => {
+                console.log('Probando endpoint /test-jwt...');
+                testJWTMutation.mutate();
+              }}
+              disabled={testJWTMutation.isPending}
+              className="flex items-center gap-2"
+            >
+              <TestTube className="h-4 w-4" />
+              {testJWTMutation.isPending ? 'Probando...' : 'Probar JWT (Backend)'}
             </Button>
           </div>
         </div>

@@ -220,4 +220,35 @@ export const whatsappApi = {
     
     return response.json();
   },
+
+  // Probar decodificación de JWT (endpoint de prueba)
+  async testJWT(): Promise<{
+    success: boolean;
+    message: string;
+    token?: string;
+    decoded?: any;
+    user?: any;
+  }> {
+    const headers = getAuthHeaders();
+    console.log('Probando endpoint /test-jwt...');
+    console.log('Headers para test:', headers);
+    
+    const response = await fetch(`${API_BASE_URL}/whatsapp/test-jwt`, {
+      method: 'GET',
+      headers,
+    });
+    
+    console.log('Test JWT response status:', response.status);
+    console.log('Test JWT response headers:', Object.fromEntries(response.headers.entries()));
+    
+    if (!response.ok) {
+      const errorText = await response.text();
+      console.error('Test JWT error response:', errorText);
+      throw new Error(`Error en test JWT: ${response.status} - ${errorText}`);
+    }
+    
+    const data = await response.json();
+    console.log('Test JWT response data:', data);
+    return data;
+  },
 };
