@@ -43,7 +43,8 @@ export function ConnectWhatsAppModal({ open, onOpenChange }: ConnectWhatsAppModa
         setError('');
         toast.success(`¡WhatsApp conectado con éxito! Número: ${phoneNumber}`);
         onOpenChange(false);
-        refetch();
+        // Refetch solo cuando se conecte exitosamente
+        setTimeout(() => refetch(), 1000);
       } else if (newStatus === 'error') {
         setIsConnecting(false);
         setError(message || 'Error al conectar WhatsApp');

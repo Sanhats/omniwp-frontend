@@ -22,7 +22,8 @@ export function WhatsAppStatusCard() {
       onSuccess: (data) => {
         console.log('Conexión exitosa:', data);
         setShowConnectModal(true);
-        refetchInfo();
+        // No hacer refetch inmediato para evitar rate limiting
+        // El refetch se hará automáticamente cuando se cierre el modal
       },
       onError: (error) => {
         console.error('Error en conexión:', error);

@@ -55,8 +55,9 @@ export const useConnectWhatsApp = () => {
       console.log('Respuesta de conexión WhatsApp:', data);
       if (data.success) {
         toast.success('Iniciando conexión de WhatsApp...');
-        // Invalidar queries relacionadas
-        queryClient.invalidateQueries({ queryKey: ['whatsapp'] });
+        // Solo invalidar queries específicas, no todas las de WhatsApp
+        queryClient.invalidateQueries({ queryKey: ['whatsapp', 'status'] });
+        // No invalidar info-auth ni availability para evitar rate limiting
       } else {
         toast.error(data.message || 'Error al conectar WhatsApp');
       }
@@ -138,8 +139,9 @@ export const useWhatsAppAvailability = (options?: { enabled?: boolean }) => {
     refetchInterval: false, // Deshabilitar auto-refresh
     refetchOnWindowFocus: false, // Deshabilitar refetch al enfocar ventana
     refetchOnMount: false, // Deshabilitar refetch al montar
-    retry: false, // No reintentar en caso de error
-    staleTime: 600000, // Los datos son válidos por 10 minutos
+    retry: 1, // Solo 1 reintento
+    retryDelay: 5000, // Esperar 5 segundos entre reintentos
+    staleTime: 1800000, // Los datos son válidos por 30 minutos (más tiempo)
     enabled: options?.enabled !== false, // Permitir deshabilitar
     throwOnError: false, // No lanzar error, solo devolverlo
   });
