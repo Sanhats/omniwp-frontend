@@ -26,6 +26,9 @@ export function WhatsAppStatusCard() {
     console.log('🚀 Componente - Iniciando conexión WhatsApp...');
     console.log('🚀 Componente - connectMutation.isPending:', connectMutation.isPending);
     
+    // Mostrar mensaje de que puede tardar
+    toast.info('Conectando WhatsApp... Esto puede tardar hasta 2 minutos.');
+    
     connectMutation.mutate(undefined, {
       onSuccess: (data) => {
         console.log('✅ Componente onSuccess - Conexión exitosa:', data);

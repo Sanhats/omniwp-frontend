@@ -68,7 +68,12 @@ export const useConnectWhatsApp = () => {
     },
     onError: (error) => {
       console.error('❌ Hook onError - Error al conectar WhatsApp:', error);
-      toast.error('Error al conectar WhatsApp: ' + error.message);
+      
+      if (error.message.includes('signal timed out')) {
+        toast.error('La conexión está tardando más de lo esperado. Por favor, intenta nuevamente.');
+      } else {
+        toast.error('Error al conectar WhatsApp: ' + error.message);
+      }
     },
   });
 };

@@ -99,8 +99,8 @@ export const whatsappApi = {
       const response = await fetch(`${API_BASE_URL}/whatsapp/connect-auth`, {
         method: 'POST',
         headers,
-        // Agregar timeout más largo
-        signal: AbortSignal.timeout(30000), // 30 segundos
+        // Agregar timeout más largo para WhatsApp (puede tardar hasta 2 minutos)
+        signal: AbortSignal.timeout(120000), // 2 minutos
       });
       
       console.log('🌐 API - Response status:', response.status);
