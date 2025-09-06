@@ -8,7 +8,7 @@ import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/comp
 
 export function Header() {
   const { user } = useAuthStore();
-  const { data: whatsappStatus } = useWhatsAppStatus();
+  const { data: whatsappStatus } = useWhatsAppStatus({ enabled: true });
 
   const getWhatsAppBadge = () => {
     if (!whatsappStatus) return null;

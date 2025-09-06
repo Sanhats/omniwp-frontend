@@ -3,12 +3,15 @@ import { whatsappApi } from '../lib/api/whatsapp';
 import { toast } from 'sonner';
 
 // Hook para obtener el estado de WhatsApp
-export const useWhatsAppStatus = () => {
+export const useWhatsAppStatus = (options?: { enabled?: boolean }) => {
   return useQuery({
     queryKey: ['whatsapp', 'status'],
     queryFn: whatsappApi.getStatus,
-    refetchInterval: 60000, // Auto-refresh cada 60 segundos
-    retry: 3,
+    refetchInterval: 120000, // Auto-refresh cada 2 minutos (reducido)
+    retry: 2, // Reducir reintentos
+    retryDelay: 5000, // Esperar 5 segundos entre reintentos
+    staleTime: 60000, // Los datos son válidos por 1 minuto
+    enabled: options?.enabled !== false, // Permitir deshabilitar
   });
 };
 
@@ -31,8 +34,10 @@ export const useWhatsAppMessages = (filters?: {
   return useQuery({
     queryKey: ['whatsapp', 'messages', filters],
     queryFn: () => whatsappApi.getMessages(filters),
-    refetchInterval: 30000, // Auto-refresh cada 30 segundos
-    retry: 3,
+    refetchInterval: 60000, // Auto-refresh cada 1 minuto (reducido)
+    retry: 2, // Reducir reintentos
+    retryDelay: 5000, // Esperar 5 segundos entre reintentos
+    staleTime: 30000, // Los datos son válidos por 30 segundos
   });
 };
 
@@ -120,11 +125,14 @@ export const useSendWhatsApp = () => {
 };
 
 // Hook para verificar disponibilidad del servicio
-export const useWhatsAppAvailability = () => {
+export const useWhatsAppAvailability = (options?: { enabled?: boolean }) => {
   return useQuery({
     queryKey: ['whatsapp', 'availability'],
     queryFn: whatsappApi.getAvailability,
-    refetchInterval: 300000, // Refrescar cada 5 minutos
-    retry: 3,
+    refetchInterval: 600000, // Refrescar cada 10 minutos (reducido)
+    retry: 2, // Reducir reintentos
+    retryDelay: 10000, // Esperar 10 segundos entre reintentos
+    staleTime: 300000, // Los datos son válidos por 5 minutos
+    enabled: options?.enabled !== false, // Permitir deshabilitar
   });
 };
