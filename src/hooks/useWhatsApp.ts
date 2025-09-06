@@ -21,7 +21,7 @@ export const useWhatsAppStatus = (options?: { enabled?: boolean }) => {
 export const useWhatsAppInfo = () => {
   return useQuery({
     queryKey: ['whatsapp', 'info'],
-    queryFn: whatsappApi.getInfo,
+    queryFn: whatsappApi.getInfoAuth, // Usar endpoint autenticado
     enabled: false, // Solo se ejecuta manualmente
     retry: 3,
   });
@@ -50,7 +50,7 @@ export const useConnectWhatsApp = () => {
   const queryClient = useQueryClient();
 
   return useMutation({
-    mutationFn: whatsappApi.connect,
+    mutationFn: whatsappApi.connectAuth, // Usar endpoint autenticado
     onSuccess: (data) => {
       if (data.success) {
         toast.success('Iniciando conexión de WhatsApp...');

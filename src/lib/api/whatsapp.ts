@@ -23,11 +23,17 @@ const getAuthHeaders = () => {
   };
 };
 
+const getPublicHeaders = () => {
+  return {
+    'Content-Type': 'application/json',
+  };
+};
+
 export const whatsappApi = {
-  // Obtener estado de conexión
+  // Obtener estado de conexión (público)
   async getStatus(): Promise<WhatsAppStatus> {
     const response = await fetch(`${API_BASE_URL}/whatsapp/status`, {
-      headers: getAuthHeaders(),
+      headers: getPublicHeaders(),
     });
     
     if (!response.ok) {
@@ -37,9 +43,23 @@ export const whatsappApi = {
     return response.json();
   },
 
-  // Conectar WhatsApp (inicia el proceso de QR)
+  // Conectar WhatsApp (público - solo verifica si se puede conectar)
   async connect(): Promise<WhatsAppConnectionResponse> {
     const response = await fetch(`${API_BASE_URL}/whatsapp/connect`, {
+      method: 'POST',
+      headers: getPublicHeaders(),
+    });
+    
+    if (!response.ok) {
+      throw new Error('Error al conectar WhatsApp');
+    }
+    
+    return response.json();
+  },
+
+  // Conectar WhatsApp autenticado (nuevo endpoint)
+  async connectAuth(): Promise<WhatsAppConnectionResponse> {
+    const response = await fetch(`${API_BASE_URL}/whatsapp/connect-auth`, {
       method: 'POST',
       headers: getAuthHeaders(),
     });
@@ -79,9 +99,22 @@ export const whatsappApi = {
     return response.json();
   },
 
-  // Obtener información del WhatsApp conectado
+  // Obtener información del WhatsApp conectado (público - solo verifica si se puede obtener)
   async getInfo(): Promise<WhatsAppInfo> {
     const response = await fetch(`${API_BASE_URL}/whatsapp/info`, {
+      headers: getPublicHeaders(),
+    });
+    
+    if (!response.ok) {
+      throw new Error('Error al obtener información de WhatsApp');
+    }
+    
+    return response.json();
+  },
+
+  // Obtener información del WhatsApp conectado (autenticado - nuevo endpoint)
+  async getInfoAuth(): Promise<WhatsAppInfo> {
+    const response = await fetch(`${API_BASE_URL}/whatsapp/info-auth`, {
       headers: getAuthHeaders(),
     });
     
@@ -129,13 +162,13 @@ export const whatsappApi = {
     return response.json();
   },
 
-  // Verificar disponibilidad del servicio
+  // Verificar disponibilidad del servicio (público)
   async getAvailability(): Promise<{
     whatsappWeb: { enabled: boolean };
     features: { redis: boolean; websockets: boolean };
   }> {
     const response = await fetch(`${API_BASE_URL}/whatsapp/availability`, {
-      headers: getAuthHeaders(),
+      headers: getPublicHeaders(),
     });
     
     if (!response.ok) {
