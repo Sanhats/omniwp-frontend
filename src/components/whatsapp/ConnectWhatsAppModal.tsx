@@ -6,6 +6,7 @@ import { Button } from '@/components/ui/button';
 import { useWhatsAppStatus } from '@/hooks/useWhatsApp';
 import { Loader2, Smartphone, CheckCircle, AlertCircle } from 'lucide-react';
 import { toast } from 'sonner';
+import QRCode from 'qrcode';
 
 interface ConnectWhatsAppModalProps {
   open: boolean;
@@ -25,6 +26,7 @@ export function ConnectWhatsAppModal({
   const [qrCode, setQrCode] = useState<string>('');
   const [isConnecting, setIsConnecting] = useState(false);
   const [error, setError] = useState<string>('');
+  const [generatedQrDataUrl, setGeneratedQrDataUrl] = useState<string>('');
   const { data: status, refetch } = useWhatsAppStatus();
 
   // Usar props si están disponibles, sino usar estado local
@@ -32,8 +34,35 @@ export function ConnectWhatsAppModal({
   const currentIsConnecting = propIsConnecting !== undefined ? propIsConnecting : isConnecting;
   const currentError = propError || error;
 
-  // Limpiar el QR code para que sea válido base64
-  const cleanQrCode = currentQrCode ? currentQrCode.replace(/,/g, '') : '';
+  // El QR del backend no es base64, es un formato de WhatsApp Web
+  // Necesitamos usar una librería para generar el QR desde este formato
+  const cleanQrCode = currentQrCode;
+
+  // Generar QR cuando recibamos el código
+  useEffect(() => {
+    if (currentQrCode && currentQrCode !== '') {
+      console.log('🔍 Modal - Generando QR desde código:', currentQrCode.substring(0, 50) + '...');
+      
+      QRCode.toDataURL(currentQrCode, {
+        width: 256,
+        margin: 2,
+        color: {
+          dark: '#000000',
+          light: '#FFFFFF'
+        }
+      })
+      .then((dataUrl) => {
+        console.log('✅ Modal - QR generado exitosamente');
+        setGeneratedQrDataUrl(dataUrl);
+      })
+      .catch((err) => {
+        console.error('❌ Modal - Error generando QR:', err);
+        setError('Error generando código QR');
+      });
+    } else {
+      setGeneratedQrDataUrl('');
+    }
+  }, [currentQrCode]);
 
   // Logging para debugging
   console.log('🔍 Modal - Props recibidas:', { 
@@ -50,7 +79,8 @@ export function ConnectWhatsAppModal({
   console.log('🔍 Modal - QR limpio:', { 
     originalLength: currentQrCode?.length || 0,
     cleanLength: cleanQrCode?.length || 0,
-    hasCommas: currentQrCode?.includes(',') || false
+    hasCommas: currentQrCode?.includes(',') || false,
+    generatedQrPresent: generatedQrDataUrl ? 'Sí' : 'No'
   });
 
   useEffect(() => {
@@ -60,6 +90,7 @@ export function ConnectWhatsAppModal({
     setQrCode('');
     setError('');
     setIsConnecting(false);
+    setGeneratedQrDataUrl('');
 
     // Escuchar eventos de QR desde el WebSocket
     const handleQR = (event: CustomEvent) => {
@@ -112,6 +143,7 @@ export function ConnectWhatsAppModal({
     setQrCode('');
     setIsConnecting(false);
     setError('');
+    setGeneratedQrDataUrl('');
     onOpenChange(false);
   };
 
@@ -129,7 +161,7 @@ export function ConnectWhatsAppModal({
         </DialogHeader>
 
         <div className="space-y-4">
-          {!cleanQrCode && !currentIsConnecting && !currentError && (
+          {!generatedQrDataUrl && !currentIsConnecting && !currentError && (
             <div className="flex flex-col items-center space-y-4 py-8">
               <Loader2 className="h-8 w-8 animate-spin text-blue-500" />
               <p className="text-sm text-muted-foreground">
@@ -152,12 +184,12 @@ export function ConnectWhatsAppModal({
             </div>
           )}
 
-          {cleanQrCode && (
+          {generatedQrDataUrl && (
             <div className="flex flex-col items-center space-y-4">
               <div className="relative">
                 {/* eslint-disable-next-line @next/next/no-img-element */}
                 <img 
-                  src={`data:image/png;base64,${cleanQrCode}`}
+                  src={generatedQrDataUrl}
                   alt="Código QR de WhatsApp"
                   className="w-64 h-64 border rounded-lg"
                 />
