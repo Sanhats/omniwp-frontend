@@ -32,6 +32,9 @@ export function ConnectWhatsAppModal({
   const currentIsConnecting = propIsConnecting !== undefined ? propIsConnecting : isConnecting;
   const currentError = propError || error;
 
+  // Limpiar el QR code para que sea válido base64
+  const cleanQrCode = currentQrCode ? currentQrCode.replace(/,/g, '') : '';
+
   // Logging para debugging
   console.log('🔍 Modal - Props recibidas:', { 
     open, 
@@ -43,6 +46,11 @@ export function ConnectWhatsAppModal({
     currentQrCode: currentQrCode ? 'Presente' : 'No presente', 
     currentIsConnecting, 
     currentError 
+  });
+  console.log('🔍 Modal - QR limpio:', { 
+    originalLength: currentQrCode?.length || 0,
+    cleanLength: cleanQrCode?.length || 0,
+    hasCommas: currentQrCode?.includes(',') || false
   });
 
   useEffect(() => {
@@ -121,7 +129,7 @@ export function ConnectWhatsAppModal({
         </DialogHeader>
 
         <div className="space-y-4">
-          {!currentQrCode && !currentIsConnecting && !currentError && (
+          {!cleanQrCode && !currentIsConnecting && !currentError && (
             <div className="flex flex-col items-center space-y-4 py-8">
               <Loader2 className="h-8 w-8 animate-spin text-blue-500" />
               <p className="text-sm text-muted-foreground">
@@ -144,12 +152,12 @@ export function ConnectWhatsAppModal({
             </div>
           )}
 
-          {currentQrCode && (
+          {cleanQrCode && (
             <div className="flex flex-col items-center space-y-4">
               <div className="relative">
                 {/* eslint-disable-next-line @next/next/no-img-element */}
                 <img 
-                  src={`data:image/png;base64,${currentQrCode}`}
+                  src={`data:image/png;base64,${cleanQrCode}`}
                   alt="Código QR de WhatsApp"
                   className="w-64 h-64 border rounded-lg"
                 />
