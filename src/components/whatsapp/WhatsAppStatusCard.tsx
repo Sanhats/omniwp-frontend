@@ -45,9 +45,9 @@ export function WhatsAppStatusCard() {
         console.log('✅ Componente onSuccess - data.status:', data.status);
         console.log('✅ Componente onSuccess - data.qrCode:', data.qrCode ? 'Presente' : 'No presente');
         
-        if (data.success && data.qrCode) {
+        if (data.success) {
           console.log('✅ Componente onSuccess - Estableciendo QR y abriendo modal...');
-          setQrCode(data.qrCode);
+          setQrCode(data.qrCode || '');
           setIsConnecting(false);
           setError('');
           setShowConnectModal(true);

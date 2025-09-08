@@ -66,18 +66,51 @@ export function ConnectWhatsAppModal({
     }
   }, [currentQrCode]);
 
-  // Auto-refresh del QR cada 30 segundos
+  // Polling para verificar estado de conexión después del escaneo
   useEffect(() => {
     if (!open || !currentQrCode) return;
 
-    const interval = setInterval(() => {
-      console.log('🔄 Modal - QR expirado, solicitando nuevo...');
-      // Aquí podrías llamar a una función para obtener un nuevo QR
-      // Por ahora solo mostramos un mensaje
-      toast.info('El código QR ha expirado. Generando uno nuevo...');
-    }, 30000); // 30 segundos
+    console.log('🔄 Modal - Iniciando polling para verificar estado de conexión...');
+    
+    // Polling cada 3 segundos para verificar si se conectó
+    const interval = setInterval(async () => {
+      try {
+        console.log('🔍 Modal - Verificando estado de conexión...');
+        const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/whatsapp/status`, {
+          headers: {
+            'Content-Type': 'application/json',
+          },
+        });
+        
+        if (response.ok) {
+          const statusData = await response.json();
+          console.log('🔍 Modal - Estado actual:', statusData);
+          
+          if (statusData.status === 'connected') {
+            console.log('✅ Modal - ¡Conexión detectada!');
+            toast.success('¡WhatsApp conectado exitosamente!');
+            clearInterval(interval);
+            // Cerrar modal después de un breve delay
+            setTimeout(() => {
+              handleClose();
+            }, 2000);
+          }
+        }
+      } catch (error) {
+        console.error('❌ Modal - Error verificando estado:', error);
+      }
+    }, 3000); // Cada 3 segundos
 
-    return () => clearInterval(interval);
+    // Limpiar después de 2 minutos
+    const timeout = setTimeout(() => {
+      clearInterval(interval);
+      console.log('⏰ Modal - Timeout de verificación de estado');
+    }, 120000); // 2 minutos
+
+    return () => {
+      clearInterval(interval);
+      clearTimeout(timeout);
+    };
   }, [open, currentQrCode]);
 
   // Logging para debugging
