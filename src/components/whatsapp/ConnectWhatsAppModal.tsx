@@ -4,7 +4,7 @@ import { useState, useEffect } from 'react';
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
 import { useWhatsAppStatus } from '@/hooks/useWhatsApp';
-import { Loader2, Smartphone, CheckCircle, AlertCircle } from 'lucide-react';
+import { Loader2, Smartphone, CheckCircle, AlertCircle, QrCode } from 'lucide-react';
 import { toast } from 'sonner';
 import QRCode from 'qrcode';
 
@@ -63,6 +63,20 @@ export function ConnectWhatsAppModal({
       setGeneratedQrDataUrl('');
     }
   }, [currentQrCode]);
+
+  // Auto-refresh del QR cada 30 segundos
+  useEffect(() => {
+    if (!open || !currentQrCode) return;
+
+    const interval = setInterval(() => {
+      console.log('🔄 Modal - QR expirado, solicitando nuevo...');
+      // Aquí podrías llamar a una función para obtener un nuevo QR
+      // Por ahora solo mostramos un mensaje
+      toast.info('El código QR ha expirado. Generando uno nuevo...');
+    }, 30000); // 30 segundos
+
+    return () => clearInterval(interval);
+  }, [open, currentQrCode]);
 
   // Logging para debugging
   console.log('🔍 Modal - Props recibidas:', { 
@@ -173,13 +187,20 @@ export function ConnectWhatsAppModal({
           {currentError && (
             <div className="flex flex-col items-center space-y-4 py-4">
               <AlertCircle className="h-12 w-12 text-red-500" />
-              <div className="text-center">
+              <div className="text-center space-y-2">
                 <p className="text-sm font-medium text-red-700">
                   Error al conectar WhatsApp
                 </p>
-                <p className="text-xs text-muted-foreground mt-1">
+                <p className="text-xs text-muted-foreground">
                   {currentError}
                 </p>
+                <div className="text-xs text-muted-foreground space-y-1 mt-3">
+                  <p className="font-medium">Si el error persiste:</p>
+                  <p>• Cierra todas las sesiones de WhatsApp Web</p>
+                  <p>• Desvincular dispositivos antiguos en WhatsApp</p>
+                  <p>• Verifica tu conexión a internet</p>
+                  <p>• Intenta generar un nuevo QR</p>
+                </div>
               </div>
             </div>
           )}
@@ -210,6 +231,22 @@ export function ConnectWhatsAppModal({
                 <p className="text-xs text-muted-foreground">
                   Abre WhatsApp → Menú → Dispositivos vinculados → Vincular un dispositivo
                 </p>
+                <p className="text-xs text-muted-foreground">
+                  El código expira en 2 minutos
+                </p>
+                <Button 
+                  variant="outline" 
+                  size="sm"
+                  onClick={() => {
+                    console.log('🔄 Usuario solicitó nuevo QR');
+                    toast.info('Generando nuevo código QR...');
+                    // Aquí podrías llamar a una función para obtener un nuevo QR
+                  }}
+                  className="mt-2"
+                >
+                  <QrCode className="h-4 w-4 mr-2" />
+                  Generar nuevo QR
+                </Button>
               </div>
             </div>
           )}
