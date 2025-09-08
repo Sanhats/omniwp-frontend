@@ -193,3 +193,32 @@ export const useTestConfig = () => {
     },
   });
 };
+
+// Hook para obtener información de debugging
+export const useWhatsAppDebug = () => {
+  return useQuery({
+    queryKey: ['whatsapp', 'debug'],
+    queryFn: whatsappApi.getDebug,
+    enabled: false, // Solo se ejecuta manualmente
+    retry: false,
+  });
+};
+
+// Hook para reiniciar conexión WhatsApp
+export const useRestartWhatsApp = () => {
+  const queryClient = useQueryClient();
+  
+  return useMutation({
+    mutationFn: whatsappApi.restart,
+    onSuccess: (data) => {
+      console.log('🔄 Restart exitoso:', data);
+      toast.success('Conexión reiniciada exitosamente');
+      // Invalidar queries relacionadas
+      queryClient.invalidateQueries({ queryKey: ['whatsapp'] });
+    },
+    onError: (error) => {
+      console.error('❌ Error al reiniciar:', error);
+      toast.error('Error al reiniciar la conexión');
+    },
+  });
+};

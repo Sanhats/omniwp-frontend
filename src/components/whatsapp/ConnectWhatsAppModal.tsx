@@ -3,7 +3,7 @@
 import { useState, useEffect } from 'react';
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
-import { useWhatsAppStatus } from '@/hooks/useWhatsApp';
+import { useWhatsAppStatus, useWhatsAppDebug, useRestartWhatsApp } from '@/hooks/useWhatsApp';
 import { Loader2, Smartphone, CheckCircle, AlertCircle, QrCode } from 'lucide-react';
 import { toast } from 'sonner';
 import QRCode from 'qrcode';
@@ -28,6 +28,8 @@ export function ConnectWhatsAppModal({
   const [error, setError] = useState<string>('');
   const [generatedQrDataUrl, setGeneratedQrDataUrl] = useState<string>('');
   const { data: status, refetch } = useWhatsAppStatus();
+  const debugQuery = useWhatsAppDebug();
+  const restartMutation = useRestartWhatsApp();
 
   // Usar props si están disponibles, sino usar estado local
   const currentQrCode = propQrCode || qrCode;
@@ -201,7 +203,64 @@ export function ConnectWhatsAppModal({
                   <p>• Verifica tu conexión a internet</p>
                   <p>• Intenta generar un nuevo QR</p>
                 </div>
+                <div className="flex gap-2 mt-3">
+                  <Button 
+                    variant="outline" 
+                    size="sm"
+                    onClick={() => {
+                      console.log('🔍 Usuario solicitó información de debug');
+                      debugQuery.refetch();
+                    }}
+                    disabled={debugQuery.isFetching}
+                  >
+                    {debugQuery.isFetching ? (
+                      <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+                    ) : (
+                      <AlertCircle className="h-4 w-4 mr-2" />
+                    )}
+                    Ver Debug Info
+                  </Button>
+                  <Button 
+                    variant="outline" 
+                    size="sm"
+                    onClick={() => {
+                      console.log('🔄 Usuario solicitó reiniciar conexión');
+                      restartMutation.mutate();
+                    }}
+                    disabled={restartMutation.isPending}
+                  >
+                    {restartMutation.isPending ? (
+                      <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+                    ) : (
+                      <Smartphone className="h-4 w-4 mr-2" />
+                    )}
+                    Reiniciar Conexión
+                  </Button>
+                </div>
               </div>
+            </div>
+          )}
+
+          {/* Mostrar información de debug si está disponible */}
+          {debugQuery.data && (
+            <div className="bg-blue-50 border border-blue-200 rounded-lg p-4 space-y-2">
+              <h4 className="text-sm font-medium text-blue-800">Información de Debug</h4>
+              <div className="text-xs text-blue-700 space-y-1">
+                <p><strong>Estado:</strong> {debugQuery.data.debug?.connectionStatus?.status || 'N/A'}</p>
+                <p><strong>Conectado:</strong> {debugQuery.data.debug?.connectionStatus?.connected ? 'Sí' : 'No'}</p>
+                <p><strong>QR Disponible:</strong> {debugQuery.data.debug?.hasQRCode ? 'Sí' : 'No'}</p>
+                <p><strong>Sesión Activa:</strong> {debugQuery.data.debug?.hasActiveSession ? 'Sí' : 'No'}</p>
+              </div>
+              {debugQuery.data.debug?.recommendations && (
+                <div className="mt-2">
+                  <p className="text-xs font-medium text-blue-800">Recomendaciones:</p>
+                  <ul className="text-xs text-blue-700 space-y-1">
+                    {debugQuery.data.debug.recommendations.map((rec: string, index: number) => (
+                      <li key={index}>• {rec}</li>
+                    ))}
+                  </ul>
+                </div>
+              )}
             </div>
           )}
 
@@ -234,19 +293,52 @@ export function ConnectWhatsAppModal({
                 <p className="text-xs text-muted-foreground">
                   El código expira en 2 minutos
                 </p>
-                <Button 
-                  variant="outline" 
-                  size="sm"
-                  onClick={() => {
-                    console.log('🔄 Usuario solicitó nuevo QR');
-                    toast.info('Generando nuevo código QR...');
-                    // Aquí podrías llamar a una función para obtener un nuevo QR
-                  }}
-                  className="mt-2"
-                >
-                  <QrCode className="h-4 w-4 mr-2" />
-                  Generar nuevo QR
-                </Button>
+                <div className="flex gap-2 mt-2">
+                  <Button 
+                    variant="outline" 
+                    size="sm"
+                    onClick={() => {
+                      console.log('🔄 Usuario solicitó nuevo QR');
+                      toast.info('Generando nuevo código QR...');
+                      // Aquí podrías llamar a una función para obtener un nuevo QR
+                    }}
+                  >
+                    <QrCode className="h-4 w-4 mr-2" />
+                    Generar nuevo QR
+                  </Button>
+                  <Button 
+                    variant="outline" 
+                    size="sm"
+                    onClick={() => {
+                      console.log('🔍 Usuario solicitó información de debug');
+                      debugQuery.refetch();
+                    }}
+                    disabled={debugQuery.isFetching}
+                  >
+                    {debugQuery.isFetching ? (
+                      <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+                    ) : (
+                      <AlertCircle className="h-4 w-4 mr-2" />
+                    )}
+                    Debug Info
+                  </Button>
+                  <Button 
+                    variant="outline" 
+                    size="sm"
+                    onClick={() => {
+                      console.log('🔄 Usuario solicitó reiniciar conexión');
+                      restartMutation.mutate();
+                    }}
+                    disabled={restartMutation.isPending}
+                  >
+                    {restartMutation.isPending ? (
+                      <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+                    ) : (
+                      <Smartphone className="h-4 w-4 mr-2" />
+                    )}
+                    Reiniciar
+                  </Button>
+                </div>
               </div>
             </div>
           )}

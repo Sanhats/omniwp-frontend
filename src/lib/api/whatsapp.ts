@@ -75,6 +75,50 @@ export const whatsappApi = {
     return response.json();
   },
 
+  // Obtener información de debugging
+  async getDebug(): Promise<{
+    success: boolean;
+    debug: {
+      userId: string;
+      connectionStatus: {
+        status: string;
+        connected: boolean;
+      };
+      hasQRCode: boolean;
+      hasActiveSession: boolean;
+      environment: {
+        nodeVersion: string;
+        platform: string;
+        redisConnected: boolean;
+      };
+      recommendations: string[];
+    };
+  }> {
+    const response = await fetch(`${API_BASE_URL}/whatsapp/debug`, {
+      headers: getAuthHeaders(),
+    });
+    
+    if (!response.ok) {
+      throw new Error('Error al obtener información de debugging');
+    }
+    
+    return response.json();
+  },
+
+  // Reiniciar conexión WhatsApp
+  async restart(): Promise<WhatsAppConnectionResponse> {
+    const response = await fetch(`${API_BASE_URL}/whatsapp/restart`, {
+      method: 'POST',
+      headers: getAuthHeaders(),
+    });
+    
+    if (!response.ok) {
+      throw new Error('Error al reiniciar la conexión');
+    }
+    
+    return response.json();
+  },
+
   // Conectar WhatsApp (público - solo verifica si se puede conectar)
   async connect(): Promise<WhatsAppConnectionResponse> {
     const response = await fetch(`${API_BASE_URL}/whatsapp/connect`, {

@@ -7,7 +7,7 @@ import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Eye, EyeOff, RefreshCw, TestTube, Settings } from 'lucide-react';
 import { User } from '@/lib/types';
-import { useTestJWT, useTestConfig } from '@/hooks/useWhatsApp';
+import { useTestJWT, useTestConfig, useWhatsAppDebug, useRestartWhatsApp } from '@/hooks/useWhatsApp';
 
 interface LocalStorageData {
   authStore: {
@@ -27,6 +27,8 @@ export function AuthDebug() {
   const [localStorageData, setLocalStorageData] = useState<LocalStorageData | null>(null);
   const testJWTMutation = useTestJWT();
   const testConfigMutation = useTestConfig();
+  const debugQuery = useWhatsAppDebug();
+  const restartMutation = useRestartWhatsApp();
 
   const refreshData = () => {
     const authStore = JSON.parse(localStorage.getItem('auth-storage') || '{}');
@@ -223,8 +225,67 @@ export function AuthDebug() {
               <Settings className="h-4 w-4" />
               {testConfigMutation.isPending ? 'Probando...' : 'Probar Config (Backend)'}
             </Button>
+            
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={() => {
+                console.log('🔍 Obteniendo información de debug...');
+                debugQuery.refetch();
+              }}
+              disabled={debugQuery.isFetching}
+              className="flex items-center gap-2"
+            >
+              <TestTube className="h-4 w-4" />
+              {debugQuery.isFetching ? 'Obteniendo...' : 'Debug WhatsApp'}
+            </Button>
+            
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={() => {
+                console.log('🔄 Reiniciando conexión WhatsApp...');
+                restartMutation.mutate();
+              }}
+              disabled={restartMutation.isPending}
+              className="flex items-center gap-2"
+            >
+              <RefreshCw className="h-4 w-4" />
+              {restartMutation.isPending ? 'Reiniciando...' : 'Reiniciar WhatsApp'}
+            </Button>
           </div>
         </div>
+        
+        {/* Información de Debug WhatsApp */}
+        {debugQuery.data && (
+          <div className="mt-4 p-4 bg-blue-50 border border-blue-200 rounded-lg">
+            <h4 className="text-sm font-medium text-blue-800 mb-2">Debug WhatsApp</h4>
+            <div className="text-xs text-blue-700 space-y-1">
+              <p><strong>Estado:</strong> {debugQuery.data.debug?.connectionStatus?.status || 'N/A'}</p>
+              <p><strong>Conectado:</strong> {debugQuery.data.debug?.connectionStatus?.connected ? 'Sí' : 'No'}</p>
+              <p><strong>QR Disponible:</strong> {debugQuery.data.debug?.hasQRCode ? 'Sí' : 'No'}</p>
+              <p><strong>Sesión Activa:</strong> {debugQuery.data.debug?.hasActiveSession ? 'Sí' : 'No'}</p>
+              {debugQuery.data.debug?.environment && (
+                <div className="mt-2">
+                  <p><strong>Entorno:</strong></p>
+                  <p>• Node: {debugQuery.data.debug.environment.nodeVersion}</p>
+                  <p>• Plataforma: {debugQuery.data.debug.environment.platform}</p>
+                  <p>• Redis: {debugQuery.data.debug.environment.redisConnected ? 'Conectado' : 'Desconectado'}</p>
+                </div>
+              )}
+              {debugQuery.data.debug?.recommendations && (
+                <div className="mt-2">
+                  <p className="font-medium">Recomendaciones:</p>
+                  <ul className="space-y-1">
+                    {debugQuery.data.debug.recommendations.map((rec: string, index: number) => (
+                      <li key={index}>• {rec}</li>
+                    ))}
+                  </ul>
+                </div>
+              )}
+            </div>
+          </div>
+        )}
       </CardContent>
     </Card>
   );
