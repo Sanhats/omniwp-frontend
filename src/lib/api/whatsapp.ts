@@ -99,8 +99,8 @@ export const whatsappApi = {
       const response = await fetch(`${API_BASE_URL}/whatsapp/connect-auth`, {
         method: 'POST',
         headers,
-        // Agregar timeout más largo para WhatsApp (puede tardar hasta 2 minutos)
-        signal: AbortSignal.timeout(120000), // 2 minutos
+        // Agregar timeout más largo para WhatsApp (puede tardar hasta 3 minutos)
+        signal: AbortSignal.timeout(180000), // 3 minutos
       });
       
       console.log('🌐 API - Response status:', response.status);
@@ -255,25 +255,67 @@ export const whatsappApi = {
     };
   }> {
     const headers = getAuthHeaders();
-    console.log('Probando endpoint /test-jwt...');
-    console.log('Headers para test:', headers);
+    console.log('🔍 Test JWT - Probando endpoint /test-jwt...');
+    console.log('🔍 Test JWT - Headers para test:', headers);
     
     const response = await fetch(`${API_BASE_URL}/whatsapp/test-jwt`, {
       method: 'GET',
       headers,
     });
     
-    console.log('Test JWT response status:', response.status);
-    console.log('Test JWT response headers:', Object.fromEntries(response.headers.entries()));
+    console.log('🔍 Test JWT - Response status:', response.status);
+    console.log('🔍 Test JWT - Response headers:', Object.fromEntries(response.headers.entries()));
     
     if (!response.ok) {
       const errorText = await response.text();
-      console.error('Test JWT error response:', errorText);
+      console.error('❌ Test JWT - Error response:', errorText);
       throw new Error(`Error en test JWT: ${response.status} - ${errorText}`);
     }
     
     const data = await response.json();
-    console.log('Test JWT response data:', data);
+    console.log('✅ Test JWT - Response data:', data);
+    return data;
+  },
+
+  // Probar configuración del backend (endpoint de prueba)
+  async testConfig(): Promise<{
+    success: boolean;
+    message: string;
+    config?: {
+      whatsapp: {
+        enabled: boolean;
+        client: string;
+        sessionPath: string;
+      };
+      redis: {
+        connected: boolean;
+        host: string;
+        port: number;
+      };
+      environment: {
+        nodeEnv: string;
+        port: number;
+      };
+    };
+  }> {
+    console.log('🔍 Test Config - Probando endpoint /test-config...');
+    
+    const response = await fetch(`${API_BASE_URL}/whatsapp/test-config`, {
+      method: 'GET',
+      headers: getPublicHeaders(),
+    });
+    
+    console.log('🔍 Test Config - Response status:', response.status);
+    console.log('🔍 Test Config - Response headers:', Object.fromEntries(response.headers.entries()));
+    
+    if (!response.ok) {
+      const errorText = await response.text();
+      console.error('❌ Test Config - Error response:', errorText);
+      throw new Error(`Error en test config: ${response.status} - ${errorText}`);
+    }
+    
+    const data = await response.json();
+    console.log('✅ Test Config - Response data:', data);
     return data;
   },
 };

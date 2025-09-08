@@ -70,7 +70,7 @@ export const useConnectWhatsApp = () => {
       console.error('❌ Hook onError - Error al conectar WhatsApp:', error);
       
       if (error.message.includes('signal timed out')) {
-        toast.error('La conexión está tardando más de lo esperado. Por favor, intenta nuevamente.');
+        toast.error('La conexión está tardando más de 3 minutos. El backend puede estar teniendo problemas. Por favor, intenta nuevamente.');
       } else {
         toast.error('Error al conectar WhatsApp: ' + error.message);
       }
@@ -161,7 +161,7 @@ export const useTestJWT = () => {
   return useMutation({
     mutationFn: whatsappApi.testJWT,
     onSuccess: (data) => {
-      console.log('Test JWT exitoso:', data);
+      console.log('✅ Test JWT exitoso:', data);
       if (data.success) {
         toast.success('JWT decodificado correctamente');
       } else {
@@ -169,8 +169,27 @@ export const useTestJWT = () => {
       }
     },
     onError: (error) => {
-      console.error('Error en test JWT:', error);
+      console.error('❌ Error en test JWT:', error);
       toast.error('Error en test JWT: ' + error.message);
+    },
+  });
+};
+
+// Hook para probar configuración del backend
+export const useTestConfig = () => {
+  return useMutation({
+    mutationFn: whatsappApi.testConfig,
+    onSuccess: (data) => {
+      console.log('✅ Test Config exitoso:', data);
+      if (data.success) {
+        toast.success('Configuración del backend verificada');
+      } else {
+        toast.error(data.message || 'Error en test config');
+      }
+    },
+    onError: (error) => {
+      console.error('❌ Error en test config:', error);
+      toast.error('Error en test config: ' + error.message);
     },
   });
 };
