@@ -10,13 +10,40 @@ import { toast } from 'sonner';
 interface ConnectWhatsAppModalProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
+  qrCode?: string;
+  isConnecting?: boolean;
+  error?: string;
 }
 
-export function ConnectWhatsAppModal({ open, onOpenChange }: ConnectWhatsAppModalProps) {
+export function ConnectWhatsAppModal({ 
+  open, 
+  onOpenChange, 
+  qrCode: propQrCode, 
+  isConnecting: propIsConnecting, 
+  error: propError 
+}: ConnectWhatsAppModalProps) {
   const [qrCode, setQrCode] = useState<string>('');
   const [isConnecting, setIsConnecting] = useState(false);
   const [error, setError] = useState<string>('');
   const { data: status, refetch } = useWhatsAppStatus();
+
+  // Usar props si están disponibles, sino usar estado local
+  const currentQrCode = propQrCode || qrCode;
+  const currentIsConnecting = propIsConnecting !== undefined ? propIsConnecting : isConnecting;
+  const currentError = propError || error;
+
+  // Logging para debugging
+  console.log('🔍 Modal - Props recibidas:', { 
+    open, 
+    propQrCode: propQrCode ? 'Presente' : 'No presente', 
+    propIsConnecting, 
+    propError 
+  });
+  console.log('🔍 Modal - Estado actual:', { 
+    currentQrCode: currentQrCode ? 'Presente' : 'No presente', 
+    currentIsConnecting, 
+    currentError 
+  });
 
   useEffect(() => {
     if (!open) return;
@@ -94,7 +121,7 @@ export function ConnectWhatsAppModal({ open, onOpenChange }: ConnectWhatsAppModa
         </DialogHeader>
 
         <div className="space-y-4">
-          {!qrCode && !isConnecting && !error && (
+          {!currentQrCode && !currentIsConnecting && !currentError && (
             <div className="flex flex-col items-center space-y-4 py-8">
               <Loader2 className="h-8 w-8 animate-spin text-blue-500" />
               <p className="text-sm text-muted-foreground">
@@ -103,7 +130,7 @@ export function ConnectWhatsAppModal({ open, onOpenChange }: ConnectWhatsAppModa
             </div>
           )}
 
-          {error && (
+          {currentError && (
             <div className="flex flex-col items-center space-y-4 py-4">
               <AlertCircle className="h-12 w-12 text-red-500" />
               <div className="text-center">
@@ -111,22 +138,22 @@ export function ConnectWhatsAppModal({ open, onOpenChange }: ConnectWhatsAppModa
                   Error al conectar WhatsApp
                 </p>
                 <p className="text-xs text-muted-foreground mt-1">
-                  {error}
+                  {currentError}
                 </p>
               </div>
             </div>
           )}
 
-          {qrCode && (
+          {currentQrCode && (
             <div className="flex flex-col items-center space-y-4">
               <div className="relative">
                 {/* eslint-disable-next-line @next/next/no-img-element */}
                 <img 
-                  src={`data:image/png;base64,${qrCode}`}
+                  src={`data:image/png;base64,${currentQrCode}`}
                   alt="Código QR de WhatsApp"
                   className="w-64 h-64 border rounded-lg"
                 />
-                {isConnecting && (
+                {currentIsConnecting && (
                   <div className="absolute inset-0 flex items-center justify-center bg-black/50 rounded-lg">
                     <div className="flex flex-col items-center space-y-2 text-white">
                       <Loader2 className="h-6 w-6 animate-spin" />
@@ -138,7 +165,7 @@ export function ConnectWhatsAppModal({ open, onOpenChange }: ConnectWhatsAppModa
               
               <div className="text-center space-y-2">
                 <p className="text-sm font-medium">
-                  {isConnecting ? 'Escaneando código...' : 'Escanea este código con tu teléfono'}
+                  {currentIsConnecting ? 'Escaneando código...' : 'Escanea este código con tu teléfono'}
                 </p>
                 <p className="text-xs text-muted-foreground">
                   Abre WhatsApp → Menú → Dispositivos vinculados → Vincular un dispositivo
@@ -179,7 +206,7 @@ export function ConnectWhatsAppModal({ open, onOpenChange }: ConnectWhatsAppModa
             <Button 
               variant="outline" 
               onClick={handleClose}
-              disabled={isConnecting}
+              disabled={currentIsConnecting}
             >
               {status?.status === 'connected' ? 'Cerrar' : 'Cancelar'}
             </Button>

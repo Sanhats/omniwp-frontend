@@ -11,6 +11,9 @@ import { toast } from 'sonner';
 
 export function WhatsAppStatusCard() {
   const [showConnectModal, setShowConnectModal] = useState(false);
+  const [qrCode, setQrCode] = useState<string>('');
+  const [isConnecting, setIsConnecting] = useState(false);
+  const [error, setError] = useState<string>('');
   const { data: status, isLoading: statusLoading, error: statusError } = useWhatsAppStatus();
   const { data: info } = useWhatsAppInfo();
   const { data: availability, error: availabilityError } = useWhatsAppAvailability();
@@ -27,6 +30,11 @@ export function WhatsAppStatusCard() {
     console.log('🚀 Componente - Iniciando conexión WhatsApp...');
     console.log('🚀 Componente - connectMutation.isPending:', connectMutation.isPending);
     
+    // Limpiar estados previos
+    setQrCode('');
+    setError('');
+    setIsConnecting(true);
+    
     // Mostrar mensaje de que puede tardar
     toast.info('Conectando WhatsApp... Esto puede tardar hasta 3 minutos.');
     
@@ -36,14 +44,24 @@ export function WhatsAppStatusCard() {
         console.log('✅ Componente onSuccess - data.success:', data.success);
         console.log('✅ Componente onSuccess - data.status:', data.status);
         console.log('✅ Componente onSuccess - data.qrCode:', data.qrCode ? 'Presente' : 'No presente');
-        console.log('✅ Componente onSuccess - Abriendo modal...');
-        setShowConnectModal(true);
-        console.log('✅ Componente onSuccess - Modal abierto:', true);
-        // No hacer refetch inmediato para evitar rate limiting
-        // El refetch se hará automáticamente cuando se cierre el modal
+        
+        if (data.success && data.qrCode) {
+          console.log('✅ Componente onSuccess - Estableciendo QR y abriendo modal...');
+          setQrCode(data.qrCode);
+          setIsConnecting(false);
+          setError('');
+          setShowConnectModal(true);
+          console.log('✅ Componente onSuccess - Modal abierto con QR');
+        } else {
+          console.error('❌ Componente onSuccess - No se recibió QR válido');
+          setError('No se pudo generar el código QR');
+          setIsConnecting(false);
+        }
       },
       onError: (error) => {
         console.error('❌ Componente onError - Error en conexión:', error);
+        setError(error.message || 'Error al conectar WhatsApp');
+        setIsConnecting(false);
       }
     });
   };
@@ -182,7 +200,18 @@ export function WhatsAppStatusCard() {
 
       <ConnectWhatsAppModal 
         open={showConnectModal}
-        onOpenChange={setShowConnectModal}
+        onOpenChange={(open) => {
+          setShowConnectModal(open);
+          if (!open) {
+            // Limpiar estados cuando se cierre el modal
+            setQrCode('');
+            setError('');
+            setIsConnecting(false);
+          }
+        }}
+        qrCode={qrCode}
+        isConnecting={isConnecting}
+        error={error}
       />
     </>
   );
